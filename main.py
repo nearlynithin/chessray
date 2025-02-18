@@ -1,17 +1,39 @@
 from pyray import *
 
+SCREEN_W = 1280
+SCREEN_H = 720
 
-init_window(1280,720,"pyShatranj")
+class Game:
+    def __init__(self):
+        self.initialize()
+        self.run_loop()
 
-set_target_fps(60)
-
-while not window_should_close():
-    begin_drawing()
+    def initialize(self):
+        init_window(SCREEN_W,SCREEN_H, 'pyShatranj')
+        set_target_fps(60)
     
-    clear_background(BLUE)
-    draw_text("Konnichiwa",30,40,30,WHITE)
+    def run_loop(self):
+        while not window_should_close():
+            self.process_input()
+            self.update_game()
+            self.generate_output()
+        self.shutdown()
+        
+    def shutdown(self):
+        close_window()
+        
+    def process_input(self):
+        pass
+    def update_game(self):
+        pass
     
-    end_drawing()
+    def generate_output(self):
+        begin_drawing()
+        clear_background(BLUE)
+        draw_text("Konnichiwa",30,40,30,WHITE)
+        end_drawing()
+        
     
-close_window()
     
+if __name__ == '__main__':
+    game = Game()
