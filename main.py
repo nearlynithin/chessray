@@ -4,20 +4,18 @@ SCREEN_W = 1280
 SCREEN_H = 720
 
 class Game:
-    def __init__(self):
-        self.initialize()
-        self.run_loop()
 
     def initialize(self):
         init_window(SCREEN_W,SCREEN_H, 'pyShatranj')
         set_target_fps(60)
+        if is_window_ready():
+            return True
     
     def run_loop(self):
         while not window_should_close():
             self.process_input()
             self.update_game()
             self.generate_output()
-        self.shutdown()
         
     def shutdown(self):
         close_window()
@@ -37,3 +35,6 @@ class Game:
     
 if __name__ == '__main__':
     game = Game()
+    if(game.initialize()):
+        game.run_loop()
+    game.shutdown()
