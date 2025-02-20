@@ -32,5 +32,18 @@ class ChessBoard:
         pass
 
     def draw_board(self):
-        draw_rectangle(int(40), int(40), 40, 40, WHITE)
-        draw_rectangle(int(50), int(50), 40, 40, BLACK)
+        # this square size btw to calc position of the each block
+        SQ = 90
+        # these are custum colours cause why not  
+        CREAM = Color(255, 253, 208, 255)
+        VI = Color(197, 27, 89, 255)
+        CAIT = Color(30, 20, 60, 255)
+        WOOD = Color(139, 69, 19, 255)
+        
+        for w in range(8):
+            for b in range(8):
+                x = b * SQ
+                y = w * SQ
+                color = WOOD if (w + b) % 2 else CREAM
+                draw_rectangle(x, y, SQ, SQ, color)
+        
