@@ -1,3 +1,5 @@
+from pyray import *
+
 UNITS = 5  # temp units for the scaling of the board
 dirs = {
     "up": (-1, 0),
@@ -30,7 +32,5 @@ class ChessBoard:
         pass
 
     def draw_board(self):
-        pass
-
-    def draw_board(self):
-        pass
+        draw_rectangle(int(40), int(40), 40, 40, WHITE)
+        draw_rectangle(int(50), int(50), 40, 40, BLACK)
