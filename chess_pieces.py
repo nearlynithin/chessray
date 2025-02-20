@@ -60,3 +60,89 @@ class Pawn(Piece):
                 opponent_color = "black" if self.color == "white" else "white"
                 if board.state[capture_pos].color == opponent_color:
                     self.moves.append(capture_pos)
+
+
+class Rook(Piece):
+    def __init__(self, color, x, y):
+        super().__init__(color, x, y)
+        
+    def move(self, x, y):
+        return super().move(x, y)
+    
+    def get_moves(self):
+        self.moves.clear()
+
+        move_dir = ["up", "down", "left", "right"]
+        for dir in move_dir:
+            dx, dy = board.dirs[dir]
+            step = 1
+            while True:
+                next_pos = (self.x + dx * step, self.y + dy * step)
+                
+                if next_pos not in board.state:
+                    break
+                
+                if board.state[next_pos] is None:
+                    self.moves.append(next_pos)
+                    step += 1
+                    continue
+                
+                op_color = "black" if self.color == "white" else "white"
+                if board.state[next_pos].color == op_color:
+                    self.moves.append(next_pos)
+                break
+
+class Bishop(Piece):
+    def __init__(self, color, x, y):
+        super().__init__(color, x, y)
+    
+    def move(self, x, y):
+        return super().move(x, y)
+    
+    def get_moves(self):
+        self.moves.clear()
+        
+        move_dir = ["top_left", "top_right","bottom_left", "bottom_right"]
+        for dir in move_dir:
+            dx, dy = board.dirs[dir]
+            step = 1
+            while True:
+                next_pos = (self.x + dx * step, self.y + dy * step)
+                
+                if next_pos not in board.state:
+                    break
+                
+                if board.state[next_pos] is None:
+                    self.moves.append(next_pos)
+                    step += 1
+                    continue
+                
+                op_color = "black" if self.color == "white" else "white"
+                if board.state[next_pos].color == op_color:
+                    self.moves.append(next_pos)
+                break
+
+class Knight(Piece):
+    def __init__(self, color, x, y):
+        super().__init__(color, x, y)
+        
+    def move(self, x, y):
+        return super().move(x, y)
+    
+    def get_moves(self):
+        self.moves.clear()
+        
+        move_dir = ["up_left","up_right","down_left",'down_right',"left_up","left_down","right_up","right_down"]
+        for dir in move_dir:
+            dx, dy = board.dirs[dir]
+            next_pos = (self.x + dx , self.y + dy)
+            
+            if next_pos not in board.state:
+                continue
+            
+            if board.state[next_pos] is None:
+                self.moves.append(next_pos)
+            else:
+                op_color = "black" if self.color == "white" else "white"
+                if board.state[next_pos].color == op_color:
+                    self.moves.append(next_pos)
