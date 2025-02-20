@@ -152,3 +152,67 @@ class Knight(Piece):
             else:
                 if board.state[next_pos].color == op_color:
                     self.moves.append(next_pos)
+
+
+class Queen(Piece):
+    def __init__(self, color, x, y):
+        super().__init__(color, x, y)
+
+    def move(self, x, y):
+        return super().move(x, y)
+
+    def get_moves(self):
+        self.moves.clear()
+        op_color = "black" if self.color == "white" else "white"
+
+        move_dir = ["up", "down", "left", "right", "top_left",
+                    "top_right", "bottom_left", "bottom_right"]
+
+        for dir in move_dir:
+            step = 1
+            dx, dy = board.dirs[dir]
+            while True:
+                next_pos = (self.x + dx * step, self.y + dy * step)
+
+                if next_pos not in board.state:
+                    break
+
+                if board.state[next_pos] is None:
+                    self.moves.append(next_pos)
+                    step += 1
+                    continue
+
+                if board.state[next_pos].color == op_color:
+                    self.moves.append(next_pos)
+                    break
+
+
+class King(Piece):
+    def __init__(self, color, x, y):
+        super().__init__(color, x, y)
+        self.check = False
+
+    def move(self, x, y):
+        return super().move(x, y)
+
+    def get_moves(self):
+        self.moves.clear()
+        op_color = "black" if self.color == "white" else "white"
+
+        move_dir = ["up", "down", "left", "right", "top_left",
+                    "top_right", "bottom_left", "bottom_right"]
+
+        for dir in move_dir:
+            dx, dy = board.state[dir]
+
+            next_pos = (self.x + dx, self.y + dy)
+
+            if next_pos not in board.state:
+                continue
+
+            if board.state[next_pos] is None:
+                self.moves.append(next_pos)
+                continue
+
+            if board.state[next_pos].color == op_color:
+                self.moves.append(next_pos)
