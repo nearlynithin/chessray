@@ -1,4 +1,5 @@
 import chess_board as board
+from chess_board import UNITS
 
 
 class Piece:
@@ -216,3 +217,46 @@ class King(Piece):
 
             if board.state[next_pos].color == op_color:
                 self.moves.append(next_pos)
+
+
+def offset(n):
+    return n * UNITS + int(UNITS/2)
+
+
+def initializePieces():
+
+    for i in range(8):
+        # Black Pawns
+        x = offset(i)
+        y = offset(1)
+        board.state[(x, y)] = Pawn("black", x, y)
+
+        # White Pawns
+        y = offset(6)
+        board.state[(x, y)] = Pawn("white", x, y)
+
+    # Rooks
+    board.state[(offset(0), offset(0))] = Rook("black", offset(0), offset(0))
+    board.state[(offset(7), offset(0))] = Rook("black", offset(7), offset(0))
+    board.state[(offset(0), offset(7))] = Rook("white", offset(0), offset(7))
+    board.state[(offset(7), offset(7))] = Rook("white", offset(7), offset(7))
+
+    # Knights
+    board.state[(offset(1), offset(0))] = Knight("black", offset(1), offset(0))
+    board.state[(offset(6), offset(0))] = Knight("black", offset(6), offset(0))
+    board.state[(offset(1), offset(7))] = Knight("white", offset(1), offset(7))
+    board.state[(offset(6), offset(7))] = Knight("white", offset(6), offset(7))
+
+    # Bishops
+    board.state[(offset(2), offset(0))] = Bishop("black", offset(2), offset(0))
+    board.state[(offset(5), offset(0))] = Bishop("black", offset(5), offset(0))
+    board.state[(offset(2), offset(7))] = Bishop("white", offset(2), offset(7))
+    board.state[(offset(5), offset(7))] = Bishop("white", offset(5), offset(7))
+
+    # Queens
+    board.state[(offset(3), offset(0))] = Queen("black", offset(3), offset(0))
+    board.state[(offset(3), offset(7))] = Queen("white", offset(3), offset(7))
+
+    # Kings
+    board.state[(offset(4), offset(0))] = King("black", offset(4), offset(0))
+    board.state[(offset(4), offset(7))] = King("white", offset(4), offset(7))

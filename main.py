@@ -1,5 +1,6 @@
 from pyray import *
-from chess_board import ChessBoard
+from chess_board import ChessBoard, UNITS
+from chess_pieces import initializePieces
 
 SCREEN_W = 1280
 SCREEN_H = 720
@@ -10,6 +11,9 @@ class Game:
     def initialize(self):
         init_window(SCREEN_W, SCREEN_H, 'pyShatranj')
         set_target_fps(60)
+
+        initializePieces()
+
         if is_window_ready():
             return True
 
@@ -33,6 +37,7 @@ class Game:
         clear_background(BLUE)
         draw_text("Konnichiwa", 30, 40, 30, WHITE)
         board.draw_board()
+        board.drawPieces()
         end_drawing()
 
 
