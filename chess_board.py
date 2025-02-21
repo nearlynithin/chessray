@@ -1,6 +1,6 @@
 from pyray import *
 
-UNITS = 5  # temp units for the scaling of the board
+UNITS = 90  # temp units for the scaling of the board
 dirs = {
     "up": (-1, 0),
     "down": (+1, 0),
@@ -26,24 +26,25 @@ class ChessBoard:
 
     def __init__(self):
         self.pieces = {}
-        self.initialize_pieces()
-
-    def initialize_pieces(self):
-        pass
 
     def draw_board(self):
         # this square size btw to calc position of the each block
         SQ = 90
-        # these are custum colours cause why not  
+        # these are custum colours cause why not
         CREAM = Color(255, 253, 208, 255)
         VI = Color(197, 27, 89, 255)
         CAIT = Color(30, 20, 60, 255)
         WOOD = Color(139, 69, 19, 255)
-        
+
         for w in range(8):
             for b in range(8):
-                x = b * SQ
-                y = w * SQ
+                x = b * UNITS
+                y = w * UNITS
                 color = WOOD if (w + b) % 2 else CREAM
-                draw_rectangle(x, y, SQ, SQ, color)
-        
+                draw_rectangle(x, y, UNITS, UNITS, color)
+
+    def drawPieces(self):
+        for pos, piece in state.items():
+            x, y = pos
+            draw_circle(x, y, 10, GREEN)
+            # print(piece)
