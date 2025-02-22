@@ -1,6 +1,6 @@
 from pyray import *
 from chess_board import ChessBoard, UNITS
-from chess_pieces import initializePieces
+from chess_pieces import initializePieces, initializeTextures
 
 SCREEN_W = 1280
 SCREEN_H = 720
@@ -13,6 +13,7 @@ class Game:
         set_target_fps(60)
 
         initializePieces()
+        initializeTextures()
 
         if is_window_ready():
             return True

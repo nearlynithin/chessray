@@ -23,6 +23,10 @@ class Piece:
     def get_position(self):
         return (self.x, self.y)
 
+    def init_texture(self):
+        # method to be overridden in every Piece's class
+        print("Initializing textures...")
+
     def highlight(self):
         pass
 
@@ -260,3 +264,8 @@ def initializePieces():
     # Kings
     board.state[(offset(4), offset(0))] = King("black", offset(4), offset(0))
     board.state[(offset(4), offset(7))] = King("white", offset(4), offset(7))
+
+
+def initializeTextures():
+    for _, pieces in board.state.items():
+        pieces.init_texture()
