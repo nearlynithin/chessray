@@ -12,8 +12,10 @@ class Game:
         init_window(SCREEN_W, SCREEN_H, 'pyShatranj')
         set_target_fps(60)
 
-        initializePieces()
-        initializeTextures()
+        initializePieces(board)
+        initializeTextures(board)
+
+        board.draw_moves()
 
         if is_window_ready():
             return True
