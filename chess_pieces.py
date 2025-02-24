@@ -44,16 +44,14 @@ class Pawn(Piece):
         if (self.color == "white"):
             dx, dy = self.board.dirs["up"]
             next_row = self.x + dx
-            next_col = self.x + dy
+            next_col = self.y + dy
             next_pos = (next_row, next_col)
-
-            print(self.board.state.get(next_pos))
 
             if 0 <= next_row < 8 and 0 <= next_col < 8 and self.board.state.get(next_pos) is None:
                 self.moves.append(next_pos)
                 if self.first:
                     next_row = self.x + dx * 2
-                    next_col = self.x + dy * 2
+                    next_col = self.y + dy * 2
                     next_pos = (next_row, next_col)
                     if 0 <= next_row < 8 and 0 <= next_col < 8 and self.board.state.get(next_pos) is None:
                         self.moves.append(next_pos)
@@ -61,14 +59,14 @@ class Pawn(Piece):
         if (self.color == "black"):
             dx, dy = self.board.dirs["down"]
             next_row = self.x + dx
-            next_col = self.x + dy
+            next_col = self.y + dy
             next_pos = (next_row, next_col)
 
             if 0 <= next_row < 8 and 0 <= next_col < 8 and self.board.state.get(next_pos) is None:
                 self.moves.append(next_pos)
                 if self.first:
                     next_row = self.x + dx * 2
-                    next_col = self.x + dy * 2
+                    next_col = self.y + dy * 2
                     next_pos = (next_row, next_col)
                     if 0 <= next_row < 8 and 0 <= next_col < 8 and self.board.state.get(next_pos) is None:
                         self.moves.append(next_pos)
