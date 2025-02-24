@@ -62,5 +62,10 @@ class ChessBoard:
         for pos, piece in self.state.items():
             if piece is not None:
                 piece.get_moves()
+                for move in piece.moves:
+                    y, x = move
+                    x = (UNITS//2) + x * UNITS
+                    y = (UNITS//2) + y * UNITS
+                    draw_circle(x, y, 10, BLACK)
                 print(
                     f"{type(piece).__name__} at {pos} has {len(piece.moves)} moves")

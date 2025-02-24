@@ -15,8 +15,6 @@ class Game:
         initializePieces(board)
         initializeTextures(board)
 
-        board.draw_moves()
-
         if is_window_ready():
             return True
 
@@ -41,6 +39,7 @@ class Game:
         draw_text("Konnichiwa", 30, 40, 30, WHITE)
         board.draw_board()
         board.drawPieces()
+        board.draw_moves()
         end_drawing()
 
 
