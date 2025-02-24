@@ -251,8 +251,8 @@ def initializePieces(board):
 
     # Rooks
     board.state[(0, 0)] = Rook("black", 0, 0, board)
-    board.state[(7, 0)] = Rook("black", 7, 0, board)
-    board.state[(0, 7)] = Rook("white", 0, 7, board)
+    board.state[(0, 7)] = Rook("black", 0, 7, board)
+    board.state[(7, 0)] = Rook("white", 7, 0, board)
     board.state[(7, 7)] = Rook("white", 7, 7, board)
 
     # Knights
