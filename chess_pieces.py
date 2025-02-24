@@ -222,12 +222,9 @@ class King(Piece):
             next_col = self.y + dy
 
             if not (0 <= next_row < 8 and 0 <= next_col < 8):
-                break
+                continue
 
             next_pos = (next_row, next_col)
-
-            if next_pos not in self.board.state:
-                continue
 
             if self.board.state[next_pos] is None:
                 self.moves.append(next_pos)
