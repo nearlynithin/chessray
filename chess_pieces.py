@@ -2,6 +2,8 @@ import pprint
 from pyray import *
 from chess_board import ChessBoard, UNITS
 
+piece_texture = None
+
 
 class Piece:
     def __init__(self, color, x, y, board):
@@ -27,8 +29,10 @@ class Piece:
     def get_position(self):
         return (self.x, self.y)
 
-    def init_texture(self):
-        pass
+    def draw_piece(self):
+        rec = get_texture_rec(self, self.color)
+        d_rec = Rectangle(self.y * UNITS, self.x * UNITS, UNITS, UNITS)
+        draw_texture_pro(piece_texture, rec, d_rec, (0, 0), 0, WHITE)
 
 
 class Pawn(Piece):
@@ -276,6 +280,31 @@ def initializePieces(board):
 
 
 def initializeTextures(board):
+    global piece_texture
+    piece_texture = load_texture("assets/pieces.png")
+
+
+def get_texture_rec(type, color):
+    offs = 0
+    if color == 'black':
+        offs = 1
+    if isinstance(type, Pawn):
+        idx = 5
+    elif isinstance(type, Rook):
+        idx = 4
+    elif isinstance(type, Knight):
+        idx = 3
+    elif isinstance(type, Bishop):
+        idx = 2
+    elif isinstance(type, Queen):
+        idx = 1
+    elif isinstance(type, King):
+        idx = 0
+
+    return Rectangle(idx * piece_texture.width//6, offs*piece_texture.height//2, piece_texture.width//6, piece_texture.height//2)
+
+
+def drawPiece(board):
     for _, piece in board.state.items():
         if piece is not None:
-            piece.init_texture()
+            piece.draw_piece()

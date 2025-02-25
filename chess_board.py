@@ -2,6 +2,11 @@ from pyray import *
 import pprint
 
 UNITS = 90  # temp units for the scaling of the board
+# these are custum colours cause why not
+CREAM = Color(255, 253, 208, 255)
+VI = Color(197, 27, 89, 255)
+CAIT = Color(30, 50, 60, 255)
+WOOD = Color(139, 69, 19, 255)
 
 
 class ChessBoard:
@@ -30,17 +35,11 @@ class ChessBoard:
         pprint.pprint(self.state)
 
     def draw_board(self):
-        # these are custum colours cause why not
-        CREAM = Color(255, 253, 208, 255)
-        VI = Color(197, 27, 89, 255)
-        CAIT = Color(30, 20, 60, 255)
-        WOOD = Color(139, 69, 19, 255)
-
         for w in range(8):
             for b in range(8):
                 x = b * UNITS
                 y = w * UNITS
-                color = WOOD if (w + b) % 2 else CREAM
+                color = BLUE if (w + b) % 2 else CREAM
                 draw_rectangle(x, y, UNITS, UNITS, color)
 
     def _initialize_empty_board(self):
