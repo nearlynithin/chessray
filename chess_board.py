@@ -1,5 +1,6 @@
 from pyray import *
 import pprint
+from raylib.enums import MouseButton
 
 UNITS = 90  # temp units for the scaling of the board
 # these are custum colours cause why not
@@ -31,6 +32,7 @@ class ChessBoard:
             "right_up": (-1, 2),
             "right_down": (1, 2),
         }
+        self.selected = None
         self._initialize_empty_board()
         pprint.pprint(self.state)
 
@@ -47,24 +49,20 @@ class ChessBoard:
             for j in range(8):
                 self.state[(i, j)] = None
 
-    def drawPieces(self):
-        for pos, piece in self.state.items():
-            if piece is not None:
-                y, x = pos
-                x = (UNITS//2) + x * UNITS
-                y = (UNITS//2) + y * UNITS
-                draw_circle(x, y, 10, piece.t_color)
-                # print(piece)
+def get_selected_piece(board):
+    m_pos = get_mouse_position()
+    m_x, m_y = int(m_pos.x // UNITS), int(m_pos.y // UNITS)
 
-    def draw_moves(self):
-        # pass
-        for pos, piece in self.state.items():
+    if is_mouse_button_down(MouseButton.MOUSE_BUTTON_LEFT):
+        if board.selected is None:
+            piece = board.state.get((m_y, m_x))
             if piece is not None:
                 piece.get_moves()
-                for move in piece.moves:
-                    y, x = move
-                    x = (UNITS//2) + x * UNITS
-                    y = (UNITS//2) + y * UNITS
-                    draw_circle(x, y, 10, BLACK)
-                print(
-                    f"{type(piece).__name__} at {pos} has {len(piece.moves)} moves")
+                piece.dragging = True
+                board.selected = piece
+
+    elif is_mouse_button_released(MouseButton.MOUSE_BUTTON_LEFT) and board.selected:
+        piece = board.selected
+        piece.move(m_y, m_x)
+        piece.dragging = False
+        board.selected = None
