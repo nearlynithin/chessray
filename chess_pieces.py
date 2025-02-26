@@ -12,6 +12,7 @@ class Piece:
         self.y = y
         self.moves = []
         self.t_color = WHITE
+        self.dragging = False
         self.board = board  # Store reference to the board
 
     def move(self, x, y):
@@ -31,8 +32,14 @@ class Piece:
 
     def draw_piece(self):
         rec = get_texture_rec(self, self.color)
-        d_rec = Rectangle(self.y * UNITS, self.x * UNITS, UNITS, UNITS)
-        draw_texture_pro(piece_texture, rec, d_rec, (0, 0), 0, WHITE)
+        if self.dragging:
+            m_pos = get_mouse_position()
+            m_x, m_y = m_pos.x, m_pos.y
+            d_rec = Rectangle(m_x - UNITS//2, m_y - UNITS//2, UNITS, UNITS)
+            draw_texture_pro(piece_texture, rec, d_rec, (0, 0), 0, WHITE)
+        else:
+            d_rec = Rectangle(self.y * UNITS, self.x * UNITS, UNITS, UNITS)
+            draw_texture_pro(piece_texture, rec, d_rec, (0, 0), 0, WHITE)
 
 
 class Pawn(Piece):
@@ -45,34 +52,26 @@ class Pawn(Piece):
         self.moves.clear()
         opponent_color = "black" if self.color == "white" else "white"
 
-        if (self.color == "white"):
-            dx, dy = self.board.dirs["up"]
+        move_dir = ["up", "top_left", "top_right"] if self.color == "white" else [
+            "down", "bottom_left", "bottom_right"]
+
+        for dir in move_dir:
+            dx, dy = self.board.dirs[dir]
             next_row = self.x + dx
             next_col = self.y + dy
             next_pos = (next_row, next_col)
 
-            if 0 <= next_row < 8 and 0 <= next_col < 8 and self.board.state.get(next_pos) is None:
-                self.moves.append(next_pos)
-                if self.first:
-                    next_row = self.x + dx * 2
-                    next_col = self.y + dy * 2
-                    next_pos = (next_row, next_col)
-                    if 0 <= next_row < 8 and 0 <= next_col < 8 and self.board.state.get(next_pos) is None:
-                        self.moves.append(next_pos)
-
-        if (self.color == "black"):
-            dx, dy = self.board.dirs["down"]
-            next_row = self.x + dx
-            next_col = self.y + dy
-            next_pos = (next_row, next_col)
-
-            if 0 <= next_row < 8 and 0 <= next_col < 8 and self.board.state.get(next_pos) is None:
-                self.moves.append(next_pos)
-                if self.first:
-                    next_row = self.x + dx * 2
-                    next_col = self.y + dy * 2
-                    next_pos = (next_row, next_col)
-                    if 0 <= next_row < 8 and 0 <= next_col < 8 and self.board.state.get(next_pos) is None:
+            if 0 <= next_row < 8 and 0 <= next_col < 8:
+                if self.board.state.get(next_pos) is None and dir == move_dir[0]:
+                    self.moves.append(next_pos)
+                    if self.first:
+                        next_row = self.x + dx * 2
+                        next_col = self.y + dy * 2
+                        next_pos = (next_row, next_col)
+                        if 0 <= next_row < 8 and 0 <= next_col < 8 and self.board.state.get(next_pos) is None:
+                            self.moves.append(next_pos)
+                elif self.board.state.get(next_pos) is not None and dir != move_dir[0]:
+                    if self.board.state.get(next_pos).color == opponent_color:
                         self.moves.append(next_pos)
 
 
@@ -304,7 +303,18 @@ def get_texture_rec(type, color):
     return Rectangle(idx * piece_texture.width//6, offs*piece_texture.height//2, piece_texture.width//6, piece_texture.height//2)
 
 
-def drawPiece(board):
+def drawPieces(board):
     for _, piece in board.state.items():
         if piece is not None:
             piece.draw_piece()
+    piece = board.selected
+    draw_moves(piece)
+
+
+def draw_moves(piece):
+    if piece is not None:
+        for move in piece.moves:
+            y, x = move
+            x = (UNITS//2) + x * UNITS
+            y = (UNITS//2) + y * UNITS
+            draw_circle(x, y, 10, GREEN)
