@@ -1,6 +1,6 @@
 from pyray import *
-from chess_board import ChessBoard, UNITS
-from chess_pieces import initializePieces, initializeTextures, drawPiece
+from chess_board import ChessBoard, UNITS, get_selected_piece
+from chess_pieces import initializePieces, initializeTextures, drawPieces
 
 SCREEN_W = 1280
 SCREEN_H = 720
@@ -28,7 +28,7 @@ class Game:
         close_window()
 
     def process_input(self):
-        pass
+        get_selected_piece(board)
 
     def update_game(self):
         pass
@@ -38,8 +38,7 @@ class Game:
         clear_background(DARKGRAY)
         draw_text("Konnichiwa", 30, 40, 30, WHITE)
         board.draw_board()
-        drawPiece(board)
-        # board.draw_moves()
+        drawPieces(board)
         end_drawing()
 
 
