@@ -1,6 +1,6 @@
 from pyray import *
 from chess_board import ChessBoard, UNITS, get_selected_piece
-from chess_pieces import initializePieces, initializeTextures, drawPieces
+from chess_pieces import initializePieces, initializeTextures, initializePlayers, drawPieces
 
 SCREEN_W = 1280
 SCREEN_H = 720
@@ -14,6 +14,7 @@ class Game:
 
         initializePieces(board)
         initializeTextures(board)
+        initializePlayers(board)
 
         if is_window_ready():
             return True
