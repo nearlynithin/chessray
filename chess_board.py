@@ -13,6 +13,8 @@ WOOD = Color(139, 69, 19, 255)
 class ChessBoard:
 
     def __init__(self):
+        self.player1 = None
+        self.player2 = None
         self.state = {}
         self.dirs = {
             "up": (-1, 0),
@@ -49,6 +51,7 @@ class ChessBoard:
             for j in range(8):
                 self.state[(i, j)] = None
 
+
 def get_selected_piece(board):
     m_pos = get_mouse_position()
     m_x, m_y = int(m_pos.x // UNITS), int(m_pos.y // UNITS)
@@ -56,13 +59,25 @@ def get_selected_piece(board):
     if is_mouse_button_down(MouseButton.MOUSE_BUTTON_LEFT):
         if board.selected is None:
             piece = board.state.get((m_y, m_x))
-            if piece is not None:
+            if piece is not None and piece.color == get_current_player(board).color:
                 piece.get_moves()
                 piece.dragging = True
                 board.selected = piece
 
     elif is_mouse_button_released(MouseButton.MOUSE_BUTTON_LEFT) and board.selected:
         piece = board.selected
-        piece.move(m_y, m_x)
         piece.dragging = False
         board.selected = None
+        piece.move(m_y, m_x, board)
+
+
+def switch_turn(board):
+    board.player1.is_turn = not board.player1.is_turn
+    board.player2.is_turn = not board.player2.is_turn
+
+
+def get_current_player(board):
+    if board.player1.is_turn:
+        return board.player1
+    else:
+        return board.player2
