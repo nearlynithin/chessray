@@ -1,6 +1,7 @@
 import pprint
 from pyray import *
-from chess_board import ChessBoard, UNITS
+from chess_board import ChessBoard, UNITS, switch_turn
+from player import Player
 
 piece_texture = None
 
@@ -15,7 +16,7 @@ class Piece:
         self.dragging = False
         self.board = board  # Store reference to the board
 
-    def move(self, x, y):
+    def move(self, x, y, board):
         if (x, y) in self.moves:
             # Update board state
             old_pos = (self.x, self.y)
@@ -24,6 +25,7 @@ class Piece:
             self.board.state[old_pos] = None
             self.x = x
             self.y = y
+            switch_turn(board)
             if isinstance(self, Pawn):
                 self.first = False
 
@@ -143,9 +145,6 @@ class Knight(Piece):
         super().__init__(color, x, y, board)
         self.t_color = PURPLE
 
-    def move(self, x, y):
-        return super().move(x, y)
-
     def get_moves(self):
         self.moves.clear()
         op_color = "black" if self.color == "white" else "white"
@@ -171,9 +170,6 @@ class Knight(Piece):
 class Queen(Piece):
     def __init__(self, color, x, y, board):
         super().__init__(color, x, y, board)
-
-    def move(self, x, y):
-        return super().move(x, y)
 
     def get_moves(self):
         self.moves.clear()
@@ -207,9 +203,6 @@ class King(Piece):
     def __init__(self, color, x, y, board):
         super().__init__(color, x, y, board)
         self.check = False
-
-    def move(self, x, y):
-        return super().move(x, y)
 
     def get_moves(self):
         self.moves.clear()
@@ -276,6 +269,11 @@ def initializePieces(board):
     board.state[(7, 4)] = King("white", 7, 4, board)
 
     pprint.pprint(board.state)
+
+
+def initializePlayers(board):
+    board.player1 = Player("white")
+    board.player2 = Player("black")
 
 
 def initializeTextures(board):
