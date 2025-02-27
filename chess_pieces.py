@@ -1,7 +1,7 @@
 import pprint
 from pyray import *
-from chess_board import ChessBoard, UNITS, switch_turn
-from player import Player
+from chess_board import UNITS
+from player import switch_turn
 
 piece_texture = None
 
@@ -269,11 +269,6 @@ def initializePieces(board):
     board.state[(7, 4)] = King("white", 7, 4, board)
 
     pprint.pprint(board.state)
-
-
-def initializePlayers(board):
-    board.player1 = Player("white")
-    board.player2 = Player("black")
 
 
 def initializeTextures(board):

@@ -1,6 +1,7 @@
 from pyray import *
-from chess_board import ChessBoard, UNITS, get_selected_piece
-from chess_pieces import initializePieces, initializeTextures, initializePlayers, drawPieces
+from chess_board import ChessBoard, get_selected_piece
+from chess_pieces import initializePieces, initializeTextures, drawPieces
+from player import initializePlayers
 
 SCREEN_W = 1280
 SCREEN_H = 720

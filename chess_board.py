@@ -1,6 +1,7 @@
 from pyray import *
 import pprint
 from raylib.enums import MouseButton
+from player import get_current_player
 
 UNITS = 90  # temp units for the scaling of the board
 # these are custum colours cause why not
@@ -69,15 +70,3 @@ def get_selected_piece(board):
         piece.dragging = False
         board.selected = None
         piece.move(m_y, m_x, board)
-
-
-def switch_turn(board):
-    board.player1.is_turn = not board.player1.is_turn
-    board.player2.is_turn = not board.player2.is_turn
-
-
-def get_current_player(board):
-    if board.player1.is_turn:
-        return board.player1
-    else:
-        return board.player2
