@@ -203,6 +203,8 @@ class King(Piece):
     def __init__(self, color, x, y, board):
         super().__init__(color, x, y, board)
         self.check = False
+        self.is_castling = False
+        self.first = True
 
     def get_moves(self):
         self.moves.clear()
@@ -228,7 +230,6 @@ class King(Piece):
 
             if self.board.state[next_pos].color == op_color:
                 self.moves.append(next_pos)
-
 
 def offset(n):
     return n * UNITS + int(UNITS/2)
@@ -311,3 +312,16 @@ def draw_moves(piece):
             x = (UNITS//2) + x * UNITS
             y = (UNITS//2) + y * UNITS
             draw_circle(x, y, 10, GREEN)
+
+def is_check(board):
+    king_pos = None
+    for pos, piece in board.state.items():
+        if isinstance(piece,King):
+            king_pos = pos
+
+    for pos, piece in board.state.items():
+        if piece is not None:
+            piece.get_moves()
+            if king_pos in piece.moves:
+                print(king_pos,"is under danger")
+                

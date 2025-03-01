@@ -1,6 +1,6 @@
 from pyray import *
 from chess_board import ChessBoard, get_selected_piece
-from chess_pieces import initializePieces, initializeTextures, drawPieces
+from chess_pieces import initializePieces, initializeTextures, drawPieces, is_check
 from player import initializePlayers
 
 SCREEN_W = 1280
@@ -41,6 +41,7 @@ class Game:
         draw_text("Konnichiwa", 30, 40, 30, WHITE)
         board.draw_board()
         drawPieces(board)
+        is_check(board)
         end_drawing()
 
 
