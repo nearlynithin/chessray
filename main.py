@@ -1,6 +1,6 @@
 from pyray import *
 from chess_board import ChessBoard, get_selected_piece
-from chess_pieces import initializePieces, initializeTextures, drawPieces, is_check
+from chess_pieces import initializePieces, initializeTextures, drawPieces, is_check, update_all_piece_moves, is_checkmate
 from player import initializePlayers
 
 SCREEN_W = 1280
@@ -13,9 +13,9 @@ class Game:
         init_window(SCREEN_W, SCREEN_H, 'pyShatranj')
         set_target_fps(60)
 
+        initializePlayers(board)
         initializePieces(board)
         initializeTextures(board)
-        initializePlayers(board)
 
         if is_window_ready():
             return True
@@ -33,7 +33,9 @@ class Game:
         get_selected_piece(board)
 
     def update_game(self):
-        pass
+        update_all_piece_moves(board)
+        if is_checkmate(board):
+            print("CHECKMATE")
 
     def generate_output(self):
         begin_drawing()
@@ -41,7 +43,6 @@ class Game:
         draw_text("Konnichiwa", 30, 40, 30, WHITE)
         board.draw_board()
         drawPieces(board)
-        is_check(board)
         end_drawing()
 
 

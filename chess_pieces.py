@@ -1,7 +1,7 @@
 import pprint
 from pyray import *
 from chess_board import UNITS
-from player import switch_turn
+from player import switch_turn, get_current_player, get_attack_player, get_not_current_player
 
 piece_texture = None
 
@@ -231,6 +231,14 @@ class King(Piece):
             if self.board.state[next_pos].color == op_color:
                 self.moves.append(next_pos)
 
+    def is_under_check(self):
+        self.check = is_check(self.board, (self.x, self.y))
+        if self.check:
+            player = get_attack_player(self.board)
+            print(self, self.color, "is under check by",
+                  player.color, player.attack)
+
+
 def offset(n):
     return n * UNITS + int(UNITS/2)
 
@@ -268,6 +276,8 @@ def initializePieces(board):
     # Kings
     board.state[(0, 4)] = King("black", 0, 4, board)
     board.state[(7, 4)] = King("white", 7, 4, board)
+    board.player1.king = board.state[(0, 4)]
+    board.player2.king = board.state[(7, 4)]
 
     pprint.pprint(board.state)
 
@@ -297,6 +307,14 @@ def get_texture_rec(type, color):
     return Rectangle(idx * piece_texture.width//6, offs*piece_texture.height//2, piece_texture.width//6, piece_texture.height//2)
 
 
+def update_all_piece_moves(board):
+    for _, piece in board.state.items():
+        if piece is not None:
+            if isinstance(piece, King):
+                piece.is_under_check()
+            piece.get_moves()
+
+
 def drawPieces(board):
     for _, piece in board.state.items():
         if piece is not None:
@@ -313,15 +331,82 @@ def draw_moves(piece):
             y = (UNITS//2) + y * UNITS
             draw_circle(x, y, 10, GREEN)
 
-def is_check(board):
-    king_pos = None
-    for pos, piece in board.state.items():
-        if isinstance(piece,King):
-            king_pos = pos
 
-    for pos, piece in board.state.items():
+def is_check(board, positon):
+    for _, piece in board.state.items():
         if piece is not None:
-            piece.get_moves()
-            if king_pos in piece.moves:
-                print(king_pos,"is under danger")
-                
+            if positon in piece.moves:
+                if isinstance(board.state.get(positon), King):
+                    get_not_current_player(board).attack = piece
+                return True
+    return False
+
+
+def is_checkmate(board):
+    for king in [board.player1.king, board.player2.king]:
+        if king.check:
+            possible_squares = []
+            for move in king.moves:
+                temp_state = board.state.copy()
+                old_pos = king.get_position()
+                temp_king_x, temp_king_y = move
+                temp_king = King(king.color, temp_king_x, temp_king_y, board)
+                temp_state[move] = temp_king
+                temp_state[old_pos] = None
+
+                if not is_check(board, move):
+                    possible_squares.append(move)
+
+            if len(possible_squares) > 0:
+                return False
+
+            attack_player = get_attack_player(board)
+            if not attack_player or not attack_player.attack:
+                continue
+            attack_piece = attack_player.attack
+            attack_pos = attack_piece.get_position()
+
+            for _, piece in board.state.items():
+                if piece is not None and piece.color == king.color and not isinstance(piece, King):
+                    if attack_pos in piece.moves:
+                        return False
+
+            if isinstance(attack_piece, (Queen, Rook, Bishop)):
+                attack_path = get_attack_path(king.get_position(), attack_pos)
+
+                for _, piece in board.state.items():
+                    if piece is not None and piece.color == king.color and not isinstance(piece, King):
+                        for pos in attack_path:
+                            if pos in piece.moves:
+                                return False
+            return True
+        else:
+            get_not_current_player(board).attack = None
+
+    return False
+
+
+def get_attack_path(start, end):
+    start_x, start_y = start
+    end_x, end_y = end
+
+    dx = end_x - start_x
+    dy = end_y - start_y
+
+    path = []
+
+    if dy == 0 and dx != 0:
+        step = 1 if dx > 0 else -1
+        path = [(x, start_y) for x in range(start_x + step, end_x, step)]
+
+    # Vertical move
+    elif dx == 0 and dy != 0:
+        step = 1 if dy > 0 else -1
+        path = [(start_x, y) for y in range(start_y + step, end_y, step)]
+
+    elif abs(dx) == abs(dy) and dx != 0:
+        step_x = 1 if dx > 0 else -1
+        step_y = 1 if dy > 0 else -1
+        path = [(start_x + i*step_x, start_y + i*step_y)
+                for i in range(1, abs(dx))]
+    return path

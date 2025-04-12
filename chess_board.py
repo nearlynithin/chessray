@@ -61,7 +61,6 @@ def get_selected_piece(board):
         if board.selected is None:
             piece = board.state.get((m_y, m_x))
             if piece is not None and piece.color == get_current_player(board).color:
-                piece.get_moves()
                 piece.dragging = True
                 board.selected = piece
 
