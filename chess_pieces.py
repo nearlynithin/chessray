@@ -232,10 +232,7 @@ class King(Piece):
                 self.moves.append(next_pos)
 
     def is_under_check(self):
-        if self.check:
-            print(self.color, " is under check")
-        else:
-            print(self.color, " is not under check")
+        return True if self.check else False
 
 
 def offset(n):
@@ -311,8 +308,6 @@ def update_all_piece_moves(board):
         if piece is not None:
             piece.get_moves()
             update_check(board)
-            if isinstance(piece, King):
-                piece.is_under_check()
 
 
 def drawPieces(board):
@@ -340,7 +335,7 @@ def update_check(board):
                     if player.king.get_position() in piece.moves:
                         player.attack = piece
                         player.king.check = True
-                        board.check_state = False
+                        board.check_state = True
                         return True
                     else:
                         player.attack = None
@@ -348,6 +343,57 @@ def update_check(board):
                         board.check_state = False
     return False
 
+
+def is_checkmate(board):
+    if not board.check_state:
+        return False
+
+    player = board.player1
+    for p in [board.player1, board.player2]:
+        if p.king.is_under_check():
+            player = p
+
+    king = player.king
+    king_pos = king.get_position()
+
+    under_attack = False
+    for move in king.moves:
+        for _, piece in board.state.items():
+            if piece is not None:
+                if piece.color != king.color:
+                    if move in piece.moves:
+                        under_attack = True
+                        break
+        if not under_attack:
+            return False
+    attackers = get_attack_pieces_at(king_pos, player.attack.color, board)
+
+    if len(attackers) > 1:
+        return True
+
+    if len(attackers) != 0:
+        attacker = attackers[0]
+        path = get_attack_path(attacker.get_position(), king_pos)
+
+        for _, piece in board.state.items():
+            if piece is not None:
+                if piece.color != king.color or piece == king:
+                    continue
+                if attacker.get_position() in piece.moves:
+                    return False
+                for move in piece.moves:
+                    if move in path:
+                        return False
+    return True
+
+
+def get_attack_pieces_at(position, attack_color, board):
+    attackers = []
+    for _, piece in board.state.items():
+        if piece is not None:
+            if piece.color == attack_color and position in piece.moves:
+                attackers.append(piece)
+    return attackers
 
 
 def get_attack_path(start, end):
