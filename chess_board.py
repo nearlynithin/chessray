@@ -53,6 +53,18 @@ class ChessBoard:
                 self.state[(i, j)] = None
 
 
+def get_scaled_mousepos():
+    m_pos = get_mouse_position()
+
+    s_w = get_screen_width()
+    s_h = get_screen_height()
+
+    scale_x = 1280 / s_w
+    scale_y = 720 / s_h
+
+    return Vector2(scale_x * m_pos.x, scale_y * m_pos.y)
+
+
 def get_selected_piece(board):
     m_pos = get_mouse_position()
     m_x, m_y = int(m_pos.x // UNITS), int(m_pos.y // UNITS)

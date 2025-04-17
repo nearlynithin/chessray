@@ -5,8 +5,8 @@ from player import initializePlayers
 import asyncio
 import platform
 
-SCREEN_W = 1280
-SCREEN_H = 720
+SCREEN_W = 1920
+SCREEN_H = 1080
 
 board = ChessBoard()
 
@@ -14,6 +14,7 @@ board = ChessBoard()
 class Game:
 
     def initialize(self):
+        set_config_flags(ConfigFlags.FLAG_WINDOW_HIGHDPI)
         init_window(SCREEN_W, SCREEN_H, 'pyShatranj')
         set_target_fps(60)
 
@@ -25,6 +26,7 @@ class Game:
             return True
 
     async def run_loop(self):
+        platform.window.window_resize()
         while not window_should_close():
             self.process_input()
             self.update_game()
@@ -54,8 +56,8 @@ class Game:
 async def main():
     game = Game()
 
-    if (game.initialize()):
-        game.run_loop()
+    if game.initialize():
+        await game.run_loop()
     game.shutdown()
 
 if __name__ == '__main__':
