@@ -1,6 +1,6 @@
 from pyray import *
 from chess_board import ChessBoard, get_selected_piece
-from chess_pieces import initializePieces, initializeTextures, drawPieces, is_check, update_all_piece_moves, is_checkmate
+from chess_pieces import initializePieces, initializeTextures, drawPieces, update_all_piece_moves, is_checkmate
 from player import initializePlayers
 
 SCREEN_W = 1280
@@ -34,7 +34,8 @@ class Game:
 
     def update_game(self):
         update_all_piece_moves(board)
-        if is_checkmate(board):
+        is_checkmate(board)
+        if board.check_state:
             print("CHECKMATE")
 
     def generate_output(self):

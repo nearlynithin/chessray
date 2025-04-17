@@ -384,6 +384,7 @@ def is_checkmate(board):
                 for move in piece.moves:
                     if move in path:
                         return False
+    board.checkmate_state = True
     return True
 
 
