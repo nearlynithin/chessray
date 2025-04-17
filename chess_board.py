@@ -36,6 +36,9 @@ class ChessBoard:
             "right_down": (1, 2),
         }
         self.selected = None
+        self.check_state = False
+        self.checkmate_state = False
+        self.stalemate_state = False
         self._initialize_empty_board()
         pprint.pprint(self.state)
 
