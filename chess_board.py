@@ -3,7 +3,8 @@ import pprint
 from raylib.enums import MouseButton
 from player import get_current_player
 
-UNITS = 90  # temp units for the scaling of the board
+UNITS = 120  # temp units for the scaling of the board
+BORDER = 50
 # these are custum colours cause why not
 CREAM = Color(255, 253, 208, 255)
 VI = Color(197, 27, 89, 255)
@@ -48,12 +49,13 @@ class ChessBoard:
                 x = b * UNITS
                 y = w * UNITS
                 color = BLUE if (w + b) % 2 else CREAM
-                draw_rectangle(x, y, UNITS, UNITS, color)
+                draw_rectangle(x + BORDER, y + BORDER, UNITS, UNITS, color)
 
     def draw_positions(self):
         for i in range(8):
             for j in range(8):
-                draw_text("({},{})".format(j, i), i*UNITS, j*UNITS, 10, RED)
+                draw_text("({},{})".format(j, i), i*UNITS +
+                          BORDER, j*UNITS + BORDER, 10, RED)
 
     def _initialize_empty_board(self):
         for i in range(8):
@@ -63,7 +65,8 @@ class ChessBoard:
 
 def get_selected_piece(board):
     m_pos = get_mouse_position()
-    m_x, m_y = int(m_pos.x // UNITS), int(m_pos.y // UNITS)
+    m_x, m_y = int((m_pos.x - BORDER) //
+                   UNITS), int((m_pos.y - BORDER) // UNITS)
 
     if is_mouse_button_down(MouseButton.MOUSE_BUTTON_LEFT):
         if board.selected is None:

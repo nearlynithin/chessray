@@ -1,6 +1,6 @@
 import pprint
 from pyray import *
-from chess_board import UNITS
+from chess_board import UNITS, BORDER
 from player import switch_turn, get_current_player, get_not_current_player
 piece_texture = None
 
@@ -39,7 +39,8 @@ class Piece:
             d_rec = Rectangle(m_x - UNITS//2, m_y - UNITS//2, UNITS, UNITS)
             draw_texture_pro(piece_texture, rec, d_rec, (0, 0), 0, WHITE)
         else:
-            d_rec = Rectangle(self.y * UNITS, self.x * UNITS, UNITS, UNITS)
+            d_rec = Rectangle(self.y * UNITS + BORDER,
+                              self.x * UNITS + BORDER, UNITS, UNITS)
             draw_texture_pro(piece_texture, rec, d_rec, (0, 0), 0, WHITE)
 
 
@@ -415,7 +416,7 @@ def draw_moves(piece):
             y, x = move
             x = (UNITS//2) + x * UNITS
             y = (UNITS//2) + y * UNITS
-            draw_circle(x, y, 10, GREEN)
+            draw_circle(x + BORDER, y + BORDER, 10, GREEN)
 
 
 def update_check(board):

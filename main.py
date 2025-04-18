@@ -3,15 +3,16 @@ from chess_board import ChessBoard, get_selected_piece
 from chess_pieces import initializePieces, initializeTextures, drawPieces, update_all_piece_moves, is_checkmate, is_stalemate
 from player import initializePlayers
 
-SCREEN_W = 1280
-SCREEN_H = 720
+SCREEN_W = 1920
+SCREEN_H = 1080
 
 
 class Game:
 
     def initialize(self):
+        set_config_flags(ConfigFlags.FLAG_WINDOW_UNDECORATED)
         init_window(SCREEN_W, SCREEN_H, 'pyShatranj')
-        set_target_fps(60)
+        # set_target_fps(60)
 
         initializePlayers(board)
         initializePieces(board)
@@ -44,10 +45,10 @@ class Game:
     def generate_output(self):
         begin_drawing()
         clear_background(DARKGRAY)
-        draw_text("Konnichiwa", 30, 40, 30, WHITE)
         board.draw_board()
         board.draw_positions()
         drawPieces(board)
+        draw_fps(10, 10)
         end_drawing()
 
 
