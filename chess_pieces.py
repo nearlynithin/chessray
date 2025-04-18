@@ -244,6 +244,8 @@ def offset(n):
 
 def initializePieces(board):
     initial_board(board)
+    # straight_line_attack(board)
+    # stalemate_test(board)
 
 
 def initializeTextures(board):
@@ -286,6 +288,7 @@ def remove_illegal_moves(board):
     king_pos = player.king.get_position()
     enemy_pos = enemy.king.get_position()
 
+    # Prevent adjacent kings
     adj = [(enemy_pos[0] + dx, enemy_pos[1] + dy)
            for dx in [-1, 0, 1] for dy in [-1, 0, 1] if dx or dy]
     player.king.moves = [m for m in player.king.moves if m not in adj]
@@ -294,20 +297,37 @@ def remove_illegal_moves(board):
            for dx in [-1, 0, 1] for dy in [-1, 0, 1] if dx or dy]
     enemy.king.moves = [m for m in enemy.king.moves if m not in adj]
 
+    attacked_squares = set()
     for _, piece in board.state.items():
         if piece is None or piece.color == player.color:
             continue
 
         if isinstance(piece, Pawn):
-            pawn_attacks = []
             directions = ["top_left", "top_right"] if piece.color == "white" else [
                 "bottom_left", "bottom_right"]
             for dir in directions:
                 dx, dy = board.dirs[dir]
-                pos = (piece.x + dx, piece.y + dy)
-                pawn_attacks.append(pos)
-            player.king.moves = [
-                m for m in player.king.moves if m not in pawn_attacks]
+                attacked_squares.add((piece.x + dx, piece.y + dy))
+        elif isinstance(piece, Knight):
+            move_dir = ["up_left", "up_right", "down_left", 'down_right',
+                        "left_up", "left_down", "right_up", "right_down"]
+            for dir in move_dir:
+                dx, dy = board.dirs[dir]
+                attacked_squares.add((piece.x + dx, piece.y + dy))
+        elif isinstance(piece, King):
+            for dx in [-1, 0, 1]:
+                for dy in [-1, 0, 1]:
+                    if dx or dy:
+                        attacked_squares.add((piece.x + dx, piece.y + dy))
+        else:
+            attacked_squares.update(piece.moves)
+
+    player.king.moves = [
+        m for m in player.king.moves if m not in attacked_squares]
+
+    for _, piece in board.state.items():
+        if piece is None or piece.color != enemy.color:
+            continue
 
         path = get_attack_path(piece.get_position(), king_pos)
         if not path:
@@ -322,6 +342,12 @@ def remove_illegal_moves(board):
             pinned = blockers[0]
             pinned.moves = [
                 m for m in pinned.moves if m in path or m == king_pos]
+        if len(blockers) == 0:
+            path = get_range(piece, board)
+            print(piece, piece.color, "Path : ", path)
+            for move in player.king.moves:
+                if move in path:
+                    player.king.moves.remove(move)
 
 
 def piece_can_attack_through(piece, path):
@@ -339,6 +365,40 @@ def piece_can_attack_through(piece, path):
         return dx == 0 or dy == 0 or abs(dx) == abs(dy)
     else:
         return False
+
+
+def get_range(piece, board):
+    path = []
+
+    if isinstance(piece, Queen):
+        directions = [
+            board.dirs["up"], board.dirs["down"], board.dirs["left"], board.dirs["right"],
+            board.dirs["top_left"], board.dirs["top_right"],
+            board.dirs["bottom_left"], board.dirs["bottom_right"]
+        ]
+    elif isinstance(piece, Rook):
+        directions = [
+            board.dirs["up"], board.dirs["down"],
+            board.dirs["left"], board.dirs["right"]
+        ]
+    elif isinstance(piece, Bishop):
+        directions = [
+            board.dirs["top_left"], board.dirs["top_right"],
+            board.dirs["bottom_left"], board.dirs["bottom_right"]
+        ]
+    else:
+        return path
+
+    for dx, dy in directions:
+        x, y = piece.x, piece.y
+        while True:
+            x += dx
+            y += dy
+            if not (0 <= x < 8 and 0 <= y < 8):
+                break
+            path.append((x, y))
+
+    return path
 
 
 def drawPieces(board):
@@ -523,6 +583,21 @@ def pawn_attack(board):
     board.state[(0, 7)] = Rook("black", 0, 7, board)
     board.state[(7, 0)] = Rook("white", 7, 0, board)
     board.state[(7, 7)] = Rook("white", 7, 7, board)
+
+    # Kings
+    board.state[(3, 3)] = King("black", 3, 3, board)
+    board.state[(2, 6)] = King("white", 2, 6, board)
+    board.player2.king = board.state[(3, 3)]
+    board.player1.king = board.state[(2, 6)]
+
+
+def straight_line_attack(board):
+    board.state[(5, 5)] = Pawn("white", 5, 5, board)
+    board.state[(0, 3)] = Rook("black", 0, 3, board)
+    board.state[(7, 0)] = Rook("white", 7, 0, board)
+    board.state[(7, 7)] = Rook("white", 7, 7, board)
+    board.state[(5, 7)] = Queen("black", 5, 7, board)
+    board.state[(0, 2)] = Queen("white", 0, 2, board)
 
     # Kings
     board.state[(3, 3)] = King("black", 3, 3, board)
