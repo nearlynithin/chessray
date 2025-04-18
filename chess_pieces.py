@@ -1,8 +1,7 @@
 import pprint
 from pyray import *
 from chess_board import UNITS
-from player import switch_turn, get_current_player, get_attack_player, get_not_current_player
-
+from player import switch_turn, get_current_player, get_not_current_player
 piece_texture = None
 
 
@@ -224,6 +223,10 @@ class King(Piece):
 
             next_pos = (next_row, next_col)
 
+            attackers = get_attack_pieces_at(next_pos, op_color, self.board)
+            if len(attackers) > 0:
+                continue
+
             if self.board.state[next_pos] is None:
                 self.moves.append(next_pos)
                 continue
@@ -240,42 +243,7 @@ def offset(n):
 
 
 def initializePieces(board):
-    for i in range(8):
-        # Black Pawns
-        board.state[(1, i)] = Pawn("black", 1, i, board)
-
-        # White Pawns
-        board.state[(6, i)] = Pawn("white", 6, i, board)
-
-    # Rooks
-    board.state[(0, 0)] = Rook("black", 0, 0, board)
-    board.state[(0, 7)] = Rook("black", 0, 7, board)
-    board.state[(7, 0)] = Rook("white", 7, 0, board)
-    board.state[(7, 7)] = Rook("white", 7, 7, board)
-
-    # Knights
-    board.state[(0, 1)] = Knight("black", 0, 1, board)
-    board.state[(0, 6)] = Knight("black", 0, 6, board)
-    board.state[(7, 1)] = Knight("white", 7, 1, board)
-    board.state[(7, 6)] = Knight("white", 7, 6, board)
-
-    # Bishops
-    board.state[(0, 2)] = Bishop("black", 0, 2, board)
-    board.state[(0, 5)] = Bishop("black", 0, 5, board)
-    board.state[(7, 2)] = Bishop("white", 7, 2, board)
-    board.state[(7, 5)] = Bishop("white", 7, 5, board)
-
-    # Queens
-    board.state[(0, 3)] = Queen("black", 0, 3, board)
-    board.state[(7, 3)] = Queen("white", 7, 3, board)
-
-    # Kings
-    board.state[(0, 4)] = King("black", 0, 4, board)
-    board.state[(7, 4)] = King("white", 7, 4, board)
-    board.player1.king = board.state[(7, 4)]
-    board.player2.king = board.state[(0, 4)]
-
-    pprint.pprint(board.state)
+    initial_board(board)
 
 
 def initializeTextures(board):
@@ -308,6 +276,69 @@ def update_all_piece_moves(board):
         if piece is not None:
             piece.get_moves()
             update_check(board)
+            remove_illegal_moves(board)
+
+
+def remove_illegal_moves(board):
+    player = get_current_player(board)
+    enemy = get_not_current_player(board)
+
+    king_pos = player.king.get_position()
+    enemy_pos = enemy.king.get_position()
+
+    adj = [(enemy_pos[0] + dx, enemy_pos[1] + dy)
+           for dx in [-1, 0, 1] for dy in [-1, 0, 1] if dx or dy]
+    player.king.moves = [m for m in player.king.moves if m not in adj]
+
+    adj = [(king_pos[0] + dx, king_pos[1] + dy)
+           for dx in [-1, 0, 1] for dy in [-1, 0, 1] if dx or dy]
+    enemy.king.moves = [m for m in enemy.king.moves if m not in adj]
+
+    for _, piece in board.state.items():
+        if piece is None or piece.color == player.color:
+            continue
+
+        if isinstance(piece, Pawn):
+            pawn_attacks = []
+            directions = ["top_left", "top_right"] if piece.color == "white" else [
+                "bottom_left", "bottom_right"]
+            for dir in directions:
+                dx, dy = board.dirs[dir]
+                pos = (piece.x + dx, piece.y + dy)
+                pawn_attacks.append(pos)
+            player.king.moves = [
+                m for m in player.king.moves if m not in pawn_attacks]
+
+        path = get_attack_path(piece.get_position(), king_pos)
+        if not path:
+            continue
+
+        if not piece_can_attack_through(piece, path):
+            continue
+
+        blockers = [p for _, p in board.state.items(
+        ) if p and p.get_position() in path]
+        if len(blockers) == 1 and blockers[0].color == player.color:
+            pinned = blockers[0]
+            pinned.moves = [
+                m for m in pinned.moves if m in path or m == king_pos]
+
+
+def piece_can_attack_through(piece, path):
+    if not path:
+        return False
+
+    dx = path[0][0] - piece.x
+    dy = path[0][1] - piece.y
+
+    if isinstance(piece, Rook):
+        return dx == 0 or dy == 0
+    elif isinstance(piece, Bishop):
+        return abs(dx) == abs(dy)
+    elif isinstance(piece, Queen):
+        return dx == 0 or dy == 0 or abs(dx) == abs(dy)
+    else:
+        return False
 
 
 def drawPieces(board):
@@ -366,6 +397,7 @@ def is_checkmate(board):
                         break
         if not under_attack:
             return False
+
     attackers = get_attack_pieces_at(king_pos, player.attack.color, board)
 
     if len(attackers) > 1:
@@ -386,6 +418,26 @@ def is_checkmate(board):
                         return False
     board.checkmate_state = True
     return True
+
+
+def is_stalemate(board):
+    if board.check_state:
+        return False
+
+    player = get_current_player(board)
+
+    empty = True
+    for _, piece in board.state.items():
+        if piece is not None:
+            if piece.color == player.color:
+                if piece.moves:
+                    empty = False
+
+    if empty:
+        board.stalemate_state = True
+        return True
+    else:
+        return False
 
 
 def get_attack_pieces_at(position, attack_color, board):
@@ -421,3 +473,98 @@ def get_attack_path(start, end):
         path = [(start_x + i*step_x, start_y + i*step_y)
                 for i in range(1, abs(dx))]
     return path
+
+
+def stalemate_test(board):
+    board.state[(1, 4)] = Pawn("black", 1, 4, board)
+    board.state[(2, 5)] = Pawn("black", 2, 5, board)
+    board.state[(1, 6)] = Pawn("black", 1, 6, board)
+    board.state[(3, 7)] = Pawn("black", 3, 7, board)
+
+    board.state[(6, 0)] = Pawn("white", 6, 0, board)
+    board.state[(6, 1)] = Pawn("white", 6, 1, board)
+    board.state[(4, 2)] = Pawn("white", 4, 2, board)
+    board.state[(6, 3)] = Pawn("white", 6, 3, board)
+    board.state[(6, 4)] = Pawn("white", 6, 4, board)
+    board.state[(6, 5)] = Pawn("white", 6, 5, board)
+    board.state[(6, 6)] = Pawn("white", 6, 6, board)
+    board.state[(4, 7)] = Pawn("white", 4, 7, board)
+
+    # Rooks
+    board.state[(0, 7)] = Rook("black", 0, 7, board)
+    board.state[(2, 7)] = Rook("black", 2, 7, board)
+    board.state[(7, 0)] = Rook("white", 7, 0, board)
+    board.state[(7, 7)] = Rook("white", 7, 7, board)
+
+    # Knights
+    board.state[(0, 6)] = Knight("black", 0, 6, board)
+    board.state[(7, 1)] = Knight("white", 7, 1, board)
+    board.state[(7, 6)] = Knight("white", 7, 6, board)
+
+    # Bishops
+    board.state[(0, 5)] = Bishop("black", 0, 5, board)
+    board.state[(7, 2)] = Bishop("white", 7, 2, board)
+    board.state[(7, 5)] = Bishop("white", 7, 5, board)
+
+    # Queens
+    board.state[(1, 7)] = Queen("black", 1, 7, board)
+    board.state[(0, 2)] = Queen("white", 0, 2, board)
+
+    # Kings
+    board.state[(2, 6)] = King("black", 2, 6, board)
+    board.state[(7, 4)] = King("white", 7, 4, board)
+    board.player1.king = board.state[(7, 4)]
+    board.player2.king = board.state[(2, 6)]
+
+
+def pawn_attack(board):
+
+    board.state[(5, 5)] = Pawn("white", 5, 5, board)
+    board.state[(0, 7)] = Rook("black", 0, 7, board)
+    board.state[(7, 0)] = Rook("white", 7, 0, board)
+    board.state[(7, 7)] = Rook("white", 7, 7, board)
+
+    # Kings
+    board.state[(3, 3)] = King("black", 3, 3, board)
+    board.state[(2, 6)] = King("white", 2, 6, board)
+    board.player2.king = board.state[(3, 3)]
+    board.player1.king = board.state[(2, 6)]
+
+
+def initial_board(board):
+    for i in range(8):
+        # Black Pawns
+        board.state[(1, i)] = Pawn("black", 1, i, board)
+
+        # White Pawns
+        board.state[(6, i)] = Pawn("white", 6, i, board)
+
+    # Rooks
+    board.state[(0, 0)] = Rook("black", 0, 0, board)
+    board.state[(0, 7)] = Rook("black", 0, 7, board)
+    board.state[(7, 0)] = Rook("white", 7, 0, board)
+    board.state[(7, 7)] = Rook("white", 7, 7, board)
+
+    # Knights
+    board.state[(0, 1)] = Knight("black", 0, 1, board)
+    board.state[(0, 6)] = Knight("black", 0, 6, board)
+    board.state[(7, 1)] = Knight("white", 7, 1, board)
+    board.state[(7, 6)] = Knight("white", 7, 6, board)
+
+    # Bishops
+    board.state[(0, 2)] = Bishop("black", 0, 2, board)
+    board.state[(0, 5)] = Bishop("black", 0, 5, board)
+    board.state[(7, 2)] = Bishop("white", 7, 2, board)
+    board.state[(7, 5)] = Bishop("white", 7, 5, board)
+
+    # Queens
+    board.state[(0, 3)] = Queen("black", 0, 3, board)
+    board.state[(7, 3)] = Queen("white", 7, 3, board)
+
+    # Kings
+    board.state[(0, 4)] = King("black", 0, 4, board)
+    board.state[(7, 4)] = King("white", 7, 4, board)
+    board.player1.king = board.state[(7, 4)]
+    board.player2.king = board.state[(0, 4)]
+
+    pprint.pprint(board.state)

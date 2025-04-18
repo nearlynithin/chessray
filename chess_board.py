@@ -50,6 +50,11 @@ class ChessBoard:
                 color = BLUE if (w + b) % 2 else CREAM
                 draw_rectangle(x, y, UNITS, UNITS, color)
 
+    def draw_positions(self):
+        for i in range(8):
+            for j in range(8):
+                draw_text("({},{})".format(j, i), i*UNITS, j*UNITS, 10, RED)
+
     def _initialize_empty_board(self):
         for i in range(8):
             for j in range(8):

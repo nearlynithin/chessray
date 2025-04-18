@@ -1,6 +1,6 @@
 from pyray import *
 from chess_board import ChessBoard, get_selected_piece
-from chess_pieces import initializePieces, initializeTextures, drawPieces, update_all_piece_moves, is_checkmate
+from chess_pieces import initializePieces, initializeTextures, drawPieces, update_all_piece_moves, is_checkmate, is_stalemate
 from player import initializePlayers
 
 SCREEN_W = 1280
@@ -35,14 +35,18 @@ class Game:
     def update_game(self):
         update_all_piece_moves(board)
         is_checkmate(board)
-        if board.check_state:
+        is_stalemate(board)
+        if board.checkmate_state:
             print("CHECKMATE")
+        elif board.stalemate_state:
+            print("STALEMATE")
 
     def generate_output(self):
         begin_drawing()
         clear_background(DARKGRAY)
         draw_text("Konnichiwa", 30, 40, 30, WHITE)
         board.draw_board()
+        board.draw_positions()
         drawPieces(board)
         end_drawing()
 
