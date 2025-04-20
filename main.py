@@ -52,9 +52,9 @@ class Game:
         
         action = draw_sidebar_ui()
         if action == "new_game":
-            print("New Game clicked")
+            print("Blitz clicked") # add logic here for stopwatch
         elif action == "continue":
-            print("Continue clicked")
+            print("Normal clicked") # add here also
         
         draw_scanlines()
         draw_scanlines_moving()
