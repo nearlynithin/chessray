@@ -5,6 +5,7 @@ class Player:
         self.king = None
         self.attack = None
         self.captured_pieces = []
+        self.castling = False
 
     def capture_piece(self, piece):
         self.captured_pieces.append(piece)

@@ -81,6 +81,7 @@ class Rook(Piece):
     def __init__(self, color, x, y, board):
         super().__init__(color, x, y, board)
         self.t_color = GREEN
+        self.moved = False
 
     def get_moves(self):
         self.moves.clear()
@@ -205,7 +206,6 @@ class King(Piece):
         self.check = False
         self.is_castling = False
         self.first = True
-
     def get_moves(self):
         self.moves.clear()
         op_color = "black" if self.color == "white" else "white"
@@ -237,6 +237,18 @@ class King(Piece):
 
     def is_under_check(self):
         return True if self.check else False
+
+
+def updating_castling(board):
+    player = get_current_player(board)
+    # if player.color == "white"
+
+    if player.king.castling or board.check_state :
+        return
+    if player.king.first:
+        return
+    
+    
 
 
 def offset(n):
