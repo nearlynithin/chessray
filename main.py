@@ -2,6 +2,7 @@ from pyray import *
 from chess_board import ChessBoard, get_selected_piece
 from chess_pieces import initializePieces, initializeTextures, drawPieces, update_all_piece_moves, is_checkmate, is_stalemate
 from player import initializePlayers
+from ui import draw_sidebar_ui, draw_vhs_noise, draw_vhs_tint, draw_scanlines , draw_scanlines_moving, draw_vhs_noise_moving 
 
 SCREEN_W = 1280
 SCREEN_H = 720
@@ -48,6 +49,18 @@ class Game:
         board.draw_board()
         board.draw_positions()
         drawPieces(board)
+        
+        action = draw_sidebar_ui()
+        if action == "new_game":
+            print("New Game clicked")
+        elif action == "continue":
+            print("Continue clicked")
+        
+        draw_scanlines()
+        draw_scanlines_moving()
+        draw_vhs_tint()
+        draw_vhs_noise()
+        draw_vhs_noise_moving()
         end_drawing()
 
 
