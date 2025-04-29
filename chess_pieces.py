@@ -110,6 +110,17 @@ class Rook(Piece):
                     self.moves.append(next_pos)
                 break
 
+    def move(self, x, y, board):
+        if (x, y) in self.moves:
+            old_pos = (self.x, self.y)
+            new_pos = (x, y)
+            self.board.state[new_pos] = self
+            self.board.state[old_pos] = None
+            self.x = x
+            self.y = y
+            self.first = False
+            switch_turn(board)
+
 
 class Bishop(Piece):
     def __init__(self, color, x, y, board):
@@ -238,6 +249,35 @@ class King(Piece):
                 # if the oponent is being defended
                 if not is_being_attacked(next_pos, op_color, self.board):
                     self.moves.append(next_pos)
+
+    def move(self, x, y, board):
+        if (x, y) in self.moves:
+
+            row = 7 if self.color == "white" else 0
+            if (x, y) == (row, 6):  # King-side castling
+                rook = self.board.state[(row, 7)]
+                if rook:
+                    self.board.state[(row, 5)] = rook
+                    self.board.state[(row, 7)] = None
+                    rook.x, rook.y = row, 5
+                    self.castling = True
+
+            elif (x, y) == (row, 2):  # Queen-side castling
+                rook = self.board.state[(row, 0)]
+                if rook:
+                    self.board.state[(row, 3)] = rook
+                    self.board.state[(row, 0)] = None
+                    rook.x, rook.y = row, 3
+                    self.castling = True
+
+            old_pos = (self.x, self.y)
+            new_pos = (x, y)
+            self.board.state[new_pos] = self
+            self.board.state[old_pos] = None
+            self.x = x
+            self.y = y
+            self.first = False
+            switch_turn(board)
 
     def is_under_check(self):
         return True if self.check else False
