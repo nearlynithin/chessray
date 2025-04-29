@@ -301,6 +301,31 @@ def remove_illegal_moves(board):
 
     king_pos = player.king.get_position()
     enemy_pos = enemy.king.get_position()
+    
+    if board.check_state:
+        attackers = []
+        for _, piece in board.state.items():
+            if piece is None or piece.color != enemy.color:
+                continue
+            if player.king.get_position() in piece.moves:
+                attackers.append(piece)
+
+        if len(attackers) == 1:
+            attacker = attackers[0]
+            attack_path = get_attack_path(attacker.get_position(), king_pos)
+            attack_path.append(attacker.get_position())
+
+            for _, piece in board.state.items():
+                if piece is None or piece.color != player.color or piece is player.king:
+                    continue
+                piece.moves = [m for m in piece.moves if m in attack_path]
+
+        else:
+            for _, piece in board.state.items():
+                if piece is None or piece.color != player.color or piece is player.king:
+                    continue
+                piece.moves.clear()
+
 
     # Prevent adjacent kings
     adj = [(enemy_pos[0] + dx, enemy_pos[1] + dy)
