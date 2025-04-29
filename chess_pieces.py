@@ -206,6 +206,7 @@ class King(Piece):
         self.check = False
         self.is_castling = False
         self.first = True
+
     def get_moves(self):
         self.moves.clear()
         op_color = "black" if self.color == "white" else "white"
@@ -233,7 +234,9 @@ class King(Piece):
                 continue
 
             if self.board.state[next_pos].color == op_color:
-                self.moves.append(next_pos)
+                # if the oponent is being defended
+                if not is_being_attacked(next_pos, op_color, self.board):
+                    self.moves.append(next_pos)
 
     def is_under_check(self):
         return True if self.check else False
@@ -243,12 +246,10 @@ def updating_castling(board):
     player = get_current_player(board)
     # if player.color == "white"
 
-    if player.king.castling or board.check_state :
+    if player.king.castling or board.check_state:
         return
     if player.king.first:
         return
-    
-    
 
 
 def offset(n):
@@ -357,7 +358,6 @@ def remove_illegal_moves(board):
                 m for m in pinned.moves if m in path or m == king_pos]
         if len(blockers) == 0:
             path = get_range(piece, board)
-            print(piece, piece.color, "Path : ", path)
             for move in player.king.moves:
                 if move in path:
                     player.king.moves.remove(move)
@@ -520,6 +520,80 @@ def get_attack_pieces_at(position, attack_color, board):
             if piece.color == attack_color and position in piece.moves:
                 attackers.append(piece)
     return attackers
+
+
+def is_being_attacked(pos, color, board):
+    for _, piece in board.state.items():
+        if piece is None or piece.color != color:
+            continue
+        x, y = piece.get_position()
+
+        if isinstance(piece, Pawn):
+            directions = set()
+            if color == "black":
+                directions.add(board.dirs["top_left"])
+                directions.add(board.dirs["top_right"])
+            else:
+                directions.add(board.dirs["bottom_left"])
+                directions.add(board.dirs["bottom_right"])
+            for dx, dy in directions:
+                if (x + dx, y + dy) == pos:
+                    return True
+
+        elif isinstance(piece, Knight):
+            for dir in ["up_left", "up_right", "down_left", 'down_right',
+                        "left_up", "left_down", "right_up", "right_down"]:
+                dx, dy = board.dirs[dir]
+                if (x + dx, y + dy) == pos:
+                    return True
+
+        elif isinstance(piece, King):
+            for dir in ["up", "down", "left", "right", "top_left",
+                        "top_right", "bottom_left", "bottom_right"]:
+                dx, dy = board.dirs[dir]
+                if (x + dx, y + dy) == pos:
+                    return True
+
+        elif isinstance(piece, Rook):
+            for dir in ["left", "right", "up", "down"]:
+                dx, dy = board.dirs[dir]
+                i, j = x + dx, y + dy
+                while 0 <= i < 8 and 0 <= j < 8:
+                    blocking_piece = board.state.get((i, j))
+                    if (i, j) == pos:
+                        return True
+                    if blocking_piece:
+                        break
+                    i += dx
+                    j += dy
+
+        elif isinstance(piece, Bishop):
+            for dir in ["top_left", "top_right", "bottom_left", "bottom_right"]:
+                dx, dy = board.dirs[dir]
+                i, j = x + dx, y + dy
+                while 0 <= i < 8 and 0 <= j < 8:
+                    blocking_piece = board.state.get((i, j))
+                    if (i, j) == pos:
+                        return True
+                    if blocking_piece:
+                        break
+                    i += dx
+                    j += dy
+
+        elif isinstance(piece, Queen):
+            for dir in board.dirs.values():
+                dx, dy = dir
+                i, j = x + dx, y + dy
+                while 0 <= i < 8 and 0 <= j < 8:
+                    blocking_piece = board.state.get((i, j))
+                    if (i, j) == pos:
+                        return True
+                    if blocking_piece:
+                        break
+                    i += dx
+                    j += dy
+
+    return False
 
 
 def get_attack_path(start, end):

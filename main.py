@@ -41,6 +41,8 @@ class Game:
             print("CHECKMATE")
         elif board.stalemate_state:
             print("STALEMATE")
+        elif board.check_state:
+            print("CHECK")
 
     def generate_output(self):
         begin_drawing()
