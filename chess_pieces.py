@@ -80,6 +80,7 @@ class Pawn(Piece):
 class Rook(Piece):
     def __init__(self, color, x, y, board):
         super().__init__(color, x, y, board)
+        self.first = True
         self.t_color = GREEN
         self.moved = False
 
@@ -204,7 +205,7 @@ class King(Piece):
     def __init__(self, color, x, y, board):
         super().__init__(color, x, y, board)
         self.check = False
-        self.is_castling = False
+        self.castling = False
         self.first = True
 
     def get_moves(self):
@@ -244,12 +245,29 @@ class King(Piece):
 
 def updating_castling(board):
     player = get_current_player(board)
-    # if player.color == "white"
+    opponent = get_not_current_player(board)
 
-    if player.king.castling or board.check_state:
+    if player.king.castling or board.check_state or not player.king.first:
         return
-    if player.king.first:
+
+    row = 7 if player.color == "white" else 0
+    king_pos = (row, 4)
+    if player.king.get_position() != king_pos:
         return
+
+    # King-side castling
+    rook_r_pos = (row, 7)
+    if (isinstance(board.state[rook_r_pos], Rook) and board.state[rook_r_pos].first):
+        if board.state[(row, 5)] is None and board.state[(row, 6)] is None:
+            if not is_being_attacked((row, 5), opponent.color, board) and not is_being_attacked((row, 6), opponent.color, board):
+                player.king.moves.append((row, 6))
+
+    # Queen-side castling
+    rook_l_pos = (row, 0)
+    if (isinstance(board.state[rook_l_pos], Rook) and board.state[rook_l_pos].first):
+        if board.state[(row, 1)] is None and board.state[(row, 2)] is None and board.state[(row, 3)] is None:
+            if not is_being_attacked((row, 2), opponent.color, board) and not is_being_attacked((row, 3), opponent.color, board):
+                player.king.moves.append((row, 2))
 
 
 def offset(n):
@@ -257,9 +275,10 @@ def offset(n):
 
 
 def initializePieces(board):
-    initial_board(board)
+    # initial_board(board)
     # straight_line_attack(board)
     # stalemate_test(board)
+    castling_test_case(board)
 
 
 def initializeTextures(board):
@@ -293,6 +312,7 @@ def update_all_piece_moves(board):
             piece.get_moves()
             update_check(board)
             remove_illegal_moves(board)
+            updating_castling(board)
 
 
 def remove_illegal_moves(board):
@@ -301,7 +321,7 @@ def remove_illegal_moves(board):
 
     king_pos = player.king.get_position()
     enemy_pos = enemy.king.get_position()
-    
+
     if board.check_state:
         attackers = []
         for _, piece in board.state.items():
@@ -325,7 +345,6 @@ def remove_illegal_moves(board):
                 if piece is None or piece.color != player.color or piece is player.king:
                     continue
                 piece.moves.clear()
-
 
     # Prevent adjacent kings
     adj = [(enemy_pos[0] + dx, enemy_pos[1] + dy)
@@ -716,6 +735,31 @@ def straight_line_attack(board):
     board.state[(2, 6)] = King("white", 2, 6, board)
     board.player2.king = board.state[(3, 3)]
     board.player1.king = board.state[(2, 6)]
+
+
+def castling_test_case(board):
+
+    # White king and empty castling path
+    board.state[(7, 4)] = King("white", 7, 4, board)
+    board.state[(7, 0)] = Rook("white", 7, 0, board)
+    board.state[(7, 7)] = Rook("white", 7, 7, board)
+
+    # Black rooks (to simulate threats if needed)
+    board.state[(0, 0)] = Rook("black", 0, 0, board)
+    board.state[(0, 7)] = Rook("black", 0, 7, board)
+
+    # Black bishop attacking f1 (7, 5) — blocks king-side castling
+    board.state[(5, 3)] = Bishop("black", 5, 3, board)  # Diagonal to (7,5)
+
+    # Black queen attacking d1 (7, 3) — blocks queen-side castling
+    board.state[(5, 3)] = Queen("black", 5, 3, board)   # Diagonal to (7,3)
+
+    # Black king (far away)
+    board.state[(0, 4)] = King("black", 0, 4, board)
+
+    # Assign kings to players
+    board.player1.king = board.state[(7, 4)]
+    board.player2.king = board.state[(0, 4)]
 
 
 def initial_board(board):
