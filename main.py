@@ -50,7 +50,6 @@ class Game:
         begin_drawing()
         clear_background(DARKGRAY)
         board.draw_board()
-        board.draw_positions()
         drawPieces(board)
         draw_fps(10, 10)
         end_drawing()

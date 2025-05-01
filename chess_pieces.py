@@ -1,4 +1,3 @@
-import pprint
 from pyray import *
 from chess_board import UNITS, BORDER
 from player import switch_turn, get_current_player, get_not_current_player
@@ -837,5 +836,3 @@ def initial_board(board):
     board.state[(7, 4)] = King("white", 7, 4, board)
     board.player1.king = board.state[(7, 4)]
     board.player2.king = board.state[(0, 4)]
-
-    pprint.pprint(board.state)

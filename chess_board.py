@@ -1,5 +1,4 @@
 from pyray import *
-import pprint
 from raylib.enums import MouseButton
 from player import get_current_player
 
@@ -43,7 +42,6 @@ class ChessBoard:
         self.checkmate_state = False
         self.stalemate_state = False
         self._initialize_empty_board()
-        pprint.pprint(self.state)
 
     def draw_board(self):
         draw_texture(board_texture, 0, 0, WHITE)
