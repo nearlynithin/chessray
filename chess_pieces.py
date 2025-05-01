@@ -437,8 +437,12 @@ def remove_illegal_moves(board):
         ) if p and p.get_position() in path]
         if len(blockers) == 1 and blockers[0].color == player.color:
             pinned = blockers[0]
+            can_capture = True if piece.get_position() in pinned.moves else False
             pinned.moves = [
                 m for m in pinned.moves if m in path or m == king_pos]
+            if can_capture:
+                pinned.moves.append(piece.get_position())
+
         if len(blockers) == 0:
             path = get_range(piece, board)
             for move in player.king.moves:

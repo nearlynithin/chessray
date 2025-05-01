@@ -2,7 +2,7 @@ from pyray import *
 from chess_board import ChessBoard, get_selected_piece, initializeBoardTexture
 from chess_pieces import initializePieces, initializePieceTextures, drawPieces, update_all_piece_moves, is_checkmate, is_stalemate
 from player import initializePlayers
-from ui import draw_sidebar_ui, draw_vhs_noise, draw_vhs_tint, draw_scanlines , draw_scanlines_moving, draw_vhs_noise_moving 
+from ui import draw_sidebar_ui, draw_vhs_noise, draw_vhs_tint, draw_scanlines, draw_scanlines_moving, draw_vhs_noise_moving
 
 SCREEN_W = 1920
 SCREEN_H = 1080
@@ -52,18 +52,19 @@ class Game:
         clear_background(DARKGRAY)
         board.draw_board()
         drawPieces(board)
-        
+
         action = draw_sidebar_ui()
-        if action == "new_game":
-            print("Blitz clicked") # add logic here for stopwatch
-        elif action == "continue":
-            print("Normal clicked") # add here also
-        
-        draw_scanlines()
-        draw_scanlines_moving()
-        draw_vhs_tint()
-        draw_vhs_noise()
-        draw_vhs_noise_moving()
+        # if action == "new_game":
+        #     print("Blitz clicked") # add logic here for stopwatch
+        # elif action == "continue":
+        #     print("Normal clicked") # add here also
+
+        # draw_scanlines()
+        # draw_scanlines_moving()
+        # draw_vhs_tint()
+        # draw_vhs_noise()
+        # draw_vhs_noise_moving()
+        draw_fps(20, 20)
         end_drawing()
 
 
