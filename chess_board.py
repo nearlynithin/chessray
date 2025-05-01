@@ -3,13 +3,15 @@ import pprint
 from raylib.enums import MouseButton
 from player import get_current_player
 
-UNITS = 120  # temp units for the scaling of the board
-BORDER = 50
+UNITS = 124  # temp units for the scaling of the board
+BORDER = 46
 # these are custum colours cause why not
 CREAM = Color(255, 253, 208, 255)
 VI = Color(197, 27, 89, 255)
 CAIT = Color(30, 50, 60, 255)
 WOOD = Color(139, 69, 19, 255)
+
+board_texture = None
 
 
 class ChessBoard:
@@ -44,12 +46,7 @@ class ChessBoard:
         pprint.pprint(self.state)
 
     def draw_board(self):
-        for w in range(8):
-            for b in range(8):
-                x = b * UNITS
-                y = w * UNITS
-                color = BLUE if (w + b) % 2 else CREAM
-                draw_rectangle(x + BORDER, y + BORDER, UNITS, UNITS, color)
+        draw_texture(board_texture, 0, 0, WHITE)
 
     def draw_positions(self):
         for i in range(8):
@@ -61,6 +58,11 @@ class ChessBoard:
         for i in range(8):
             for j in range(8):
                 self.state[(i, j)] = None
+
+
+def initializeBoardTexture(board):
+    global board_texture
+    board_texture = load_texture("assets/board_full.png")
 
 
 def get_selected_piece(board):

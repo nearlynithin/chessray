@@ -1,6 +1,6 @@
 from pyray import *
-from chess_board import ChessBoard, get_selected_piece
-from chess_pieces import initializePieces, initializeTextures, drawPieces, update_all_piece_moves, is_checkmate, is_stalemate
+from chess_board import ChessBoard, get_selected_piece, initializeBoardTexture
+from chess_pieces import initializePieces, initializePieceTextures, drawPieces, update_all_piece_moves, is_checkmate, is_stalemate
 from player import initializePlayers
 
 SCREEN_W = 1920
@@ -10,13 +10,15 @@ SCREEN_H = 1080
 class Game:
 
     def initialize(self):
-        set_config_flags(ConfigFlags.FLAG_WINDOW_UNDECORATED)
+        set_config_flags(ConfigFlags.FLAG_WINDOW_UNDECORATED |
+                         ConfigFlags.FLAG_MSAA_4X_HINT)
         init_window(SCREEN_W, SCREEN_H, 'pyShatranj')
         # set_target_fps(60)
 
         initializePlayers(board)
         initializePieces(board)
-        initializeTextures(board)
+        initializePieceTextures(board)
+        initializeBoardTexture(board)
 
         if is_window_ready():
             return True

@@ -315,20 +315,20 @@ def offset(n):
 
 
 def initializePieces(board):
-    # initial_board(board)
+    initial_board(board)
     # straight_line_attack(board)
     # stalemate_test(board)
-    castling_test_case(board)
+    # castling_test_case(board)
 
 
-def initializeTextures(board):
+def initializePieceTextures(board):
     global piece_texture
     piece_texture = load_texture("assets/pieces.png")
 
 
 def get_texture_rec(type, color):
     offs = 0
-    if color == 'black':
+    if color == 'white':
         offs = 1
     if isinstance(type, Pawn):
         idx = 5
