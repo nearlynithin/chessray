@@ -251,23 +251,23 @@ class King(Piece):
 
     def move(self, x, y, board):
         if (x, y) in self.moves:
+            if not self.castling:
+                row = 7 if self.color == "white" else 0
+                if (x, y) == (row, 6):  # King-side castling
+                    rook = self.board.state[(row, 7)]
+                    if rook:
+                        self.board.state[(row, 5)] = rook
+                        self.board.state[(row, 7)] = None
+                        rook.x, rook.y = row, 5
+                        self.castling = True
 
-            row = 7 if self.color == "white" else 0
-            if (x, y) == (row, 6):  # King-side castling
-                rook = self.board.state[(row, 7)]
-                if rook:
-                    self.board.state[(row, 5)] = rook
-                    self.board.state[(row, 7)] = None
-                    rook.x, rook.y = row, 5
-                    self.castling = True
-
-            elif (x, y) == (row, 2):  # Queen-side castling
-                rook = self.board.state[(row, 0)]
-                if rook:
-                    self.board.state[(row, 3)] = rook
-                    self.board.state[(row, 0)] = None
-                    rook.x, rook.y = row, 3
-                    self.castling = True
+                elif (x, y) == (row, 2):  # Queen-side castling
+                    rook = self.board.state[(row, 0)]
+                    if rook:
+                        self.board.state[(row, 3)] = rook
+                        self.board.state[(row, 0)] = None
+                        rook.x, rook.y = row, 3
+                        self.castling = True
 
             old_pos = (self.x, self.y)
             new_pos = (x, y)
@@ -349,9 +349,9 @@ def update_all_piece_moves(board):
     for _, piece in board.state.items():
         if piece is not None:
             piece.get_moves()
-            update_check(board)
-            remove_illegal_moves(board)
-            updating_castling(board)
+    update_check(board)
+    remove_illegal_moves(board)
+    updating_castling(board)
 
 
 def remove_illegal_moves(board):
