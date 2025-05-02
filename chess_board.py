@@ -76,7 +76,10 @@ def initializeSounds():
         "checkmate": load_sound("assets/sounds/checkmate.mp3"),
         "stalemate": load_sound("assets/sounds/stalemate.mp3"),
         "move": load_sound("assets/sounds/move.mp3"),
-        "capture": load_sound("assets/sounds/capture.mp3")
+        "capture1": load_sound("assets/sounds/capture.mp3"),
+        "capture2": load_sound("assets/sounds/Lost.mp3"),
+        "capture3": load_sound("assets/sounds/yeah_boy.mp3"),
+        "capture4": load_sound("assets/sounds/goofy_rizz.mp3")
     }
 
 
@@ -108,8 +111,7 @@ def listen_sounds(board):
         elif board.check_state:
             play_sound(sound_manager["check"])
         elif board.piece_captured:
-            print("CAPTURED")
-            play_sound(sound_manager["capture"])
+            play_sound(sound_manager[f"capture{get_random_value(1, 4)}"])
             board.piece_captured = False
         else:
             play_sound(sound_manager["move"])
