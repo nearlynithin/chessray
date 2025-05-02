@@ -46,7 +46,7 @@ class ChessBoard:
         self._initialize_empty_board()
 
     def draw_board(self):
-        draw_texture(board_texture, 0, 0, WHITE)
+        draw_texture(board_texture, 1, -2, WHITE)
 
     def draw_positions(self):
         for i in range(8):

@@ -522,20 +522,36 @@ def get_range(piece, board):
 
 
 def drawPieces(board):
+    piece = board.selected
+    draw_moves(piece, board)
     for _, piece in board.state.items():
         if piece is not None:
             piece.draw_piece()
-    piece = board.selected
-    draw_moves(piece)
 
 
-def draw_moves(piece):
+def draw_moves(piece, board):
     if piece is not None:
+        empty_squares = set()
+        attack_squares = set()
+
+        for _, p in board.state.items():
+            if p is None or p.color == piece.color:
+                continue
+            if p.get_position() in piece.moves:
+                attack_squares.add(p.get_position())
+
         for move in piece.moves:
+            if move not in attack_squares:
+                empty_squares.add(move)
+
+        for move in empty_squares:
             y, x = move
-            x = (UNITS//2) + x * UNITS
-            y = (UNITS//2) + y * UNITS
-            draw_circle(x + BORDER, y + BORDER, 10, GREEN)
+            draw_rectangle_rounded(
+                Rectangle(x*UNITS + BORDER + 5, y * UNITS + BORDER + 5, UNITS - 10, UNITS - 10), 0.5, 5, Color(134, 181, 118, 250))
+        for move in attack_squares:
+            y, x = move
+            draw_rectangle_rounded(
+                Rectangle(x*UNITS + BORDER + 5, y * UNITS + BORDER + 5, UNITS - 10, UNITS - 10), 0.5, 5, Color(230, 76, 76, 250))
 
 
 def update_check(board):
