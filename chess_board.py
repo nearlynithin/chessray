@@ -41,6 +41,8 @@ class ChessBoard:
         self.check_state = False
         self.checkmate_state = False
         self.stalemate_state = False
+        self.promotion = None
+        self.promote_to = ""
         self._initialize_empty_board()
 
     def draw_board(self):

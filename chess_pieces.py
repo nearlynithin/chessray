@@ -24,8 +24,6 @@ class Piece:
             self.x = x
             self.y = y
             switch_turn(board)
-            if isinstance(self, Pawn):
-                self.first = False
 
     def get_position(self):
         return (self.x, self.y)
@@ -48,6 +46,26 @@ class Pawn(Piece):
         super().__init__(color, x, y, board)
         self.first = True
         self.t_color = WHITE
+        self.promoted = False
+
+    def move(self, x, y, board):
+        if (x, y) in self.moves:
+            if not self.promoted:
+                if self.color == "white" and x == 0:
+                    board.promotion = self
+                    self.promoted = True
+                elif self.color == "black" and x == 7:
+                    board.promotion = self
+                    self.promoted = True
+
+            self.first = False
+            old_pos = (self.x, self.y)
+            new_pos = (x, y)
+            self.board.state[new_pos] = self
+            self.board.state[old_pos] = None
+            self.x = x
+            self.y = y
+            switch_turn(board)
 
     def get_moves(self):
         self.moves.clear()
@@ -349,6 +367,8 @@ def update_all_piece_moves(board):
     for _, piece in board.state.items():
         if piece is not None:
             piece.get_moves()
+    board.player1.king.get_moves()
+    board.player2.king.get_moves()
     update_check(board)
     remove_illegal_moves(board)
     updating_castling(board)
@@ -539,10 +559,7 @@ def is_checkmate(board):
     if not board.check_state:
         return False
 
-    player = board.player1
-    for p in [board.player1, board.player2]:
-        if p.king.is_under_check():
-            player = p
+    player = get_current_player(board)
 
     king = player.king
     king_pos = king.get_position()
@@ -617,7 +634,7 @@ def is_being_attacked(pos, color, board):
 
         if isinstance(piece, Pawn):
             directions = set()
-            if color == "black":
+            if color == "white":
                 directions.add(board.dirs["top_left"])
                 directions.add(board.dirs["top_right"])
             else:
@@ -668,8 +685,8 @@ def is_being_attacked(pos, color, board):
                     j += dy
 
         elif isinstance(piece, Queen):
-            for dir in board.dirs.values():
-                dx, dy = dir
+            for dir in ["up", "down", "left", "right", "top_left", "top_right", "bottom_left", "bottom_right"]:
+                dx, dy = board.dirs[dir]
                 i, j = x + dx, y + dy
                 while 0 <= i < 8 and 0 <= j < 8:
                     blocking_piece = board.state.get((i, j))
@@ -707,6 +724,27 @@ def get_attack_path(start, end):
         path = [(start_x + i*step_x, start_y + i*step_y)
                 for i in range(1, abs(dx))]
     return path
+
+
+def pawn_promotion(board):
+    print(board.promotion)
+    if board.promotion and board.promote_to != "":
+        pos = board.promotion.get_position()
+        print("POS : ", pos)
+        if board.promote_to == "queen":
+            board.state[pos] = Queen(
+                board.promotion.color, pos[0], pos[1], board)
+        elif board.promote_to == "rook":
+            board.state[pos] = Rook(
+                board.promotion.color, pos[0], pos[1], board)
+        elif board.promote_to == "bishop":
+            board.state[pos] = Bishop(
+                board.promotion.color, pos[0], pos[1], board)
+        elif board.promote_to == "knight":
+            board.state[pos] = Knight(
+                board.promotion.color, pos[0], pos[1], board)
+        board.promote_to = ""
+        board.promotion = None
 
 
 def stalemate_test(board):
