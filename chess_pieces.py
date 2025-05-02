@@ -595,24 +595,24 @@ def is_checkmate(board):
         if not under_attack:
             return False
 
-    attackers = get_attack_pieces_at(king_pos, player.attack.color, board)
+    attackers = []
+    for _, piece in board.state.items():
+        if piece is not None:
+            if piece.color == player.attack.color and king_pos in piece.moves:
+                attackers.append(piece)
 
     if len(attackers) > 1:
         return True
 
     if len(attackers) != 0:
-        attacker = attackers[0]
-        path = get_attack_path(attacker.get_position(), king_pos)
-
+        possible_moves = set()
         for _, piece in board.state.items():
-            if piece is not None:
-                if piece.color != king.color or piece == king:
-                    continue
-                if attacker.get_position() in piece.moves:
-                    return False
+            if piece is not None and piece.color == king.color:
                 for move in piece.moves:
-                    if move in path:
-                        return False
+                    print(piece.color)
+                    possible_moves.add(move)
+        if len(possible_moves) != 0:
+            return False
     board.checkmate_state = True
     return True
 
