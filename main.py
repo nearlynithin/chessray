@@ -1,5 +1,5 @@
 from pyray import *
-from chess_board import ChessBoard, get_selected_piece, initializeBoardTexture
+from chess_board import ChessBoard, get_selected_piece, initializeBoardTexture,  initializeSounds, listen_sounds
 from chess_pieces import initializePieces, initializePieceTextures, drawPieces, update_all_piece_moves, is_checkmate, is_stalemate, pawn_promotion
 from player import initializePlayers
 from ui import *
@@ -14,12 +14,13 @@ class Game:
         set_config_flags(ConfigFlags.FLAG_WINDOW_UNDECORATED |
                          ConfigFlags.FLAG_MSAA_4X_HINT)
         init_window(SCREEN_W, SCREEN_H, 'pyShatranj')
-        # set_target_fps(60)
+        init_audio_device()
 
         initializePlayers(board)
         initializePieces(board)
         initializePieceTextures(board)
-        initializeBoardTexture(board)
+        initializeBoardTexture()
+        initializeSounds()
 
         if is_window_ready():
             return True
@@ -54,6 +55,7 @@ class Game:
         board.draw_board()
         drawPieces(board)
         draw_promotion_popup(board)
+        listen_sounds(board)
 
         draw_fps(20, 20)
         end_drawing()

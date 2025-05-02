@@ -19,6 +19,7 @@ def initializePlayers(board):
 def switch_turn(board):
     board.player1.is_turn = not board.player1.is_turn
     board.player2.is_turn = not board.player2.is_turn
+    board.sound = True
 
 
 def get_current_player(board):

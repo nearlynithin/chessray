@@ -11,6 +11,7 @@ CAIT = Color(30, 50, 60, 255)
 WOOD = Color(139, 69, 19, 255)
 
 board_texture = None
+sound_manager = dict()
 
 
 class ChessBoard:
@@ -43,6 +44,8 @@ class ChessBoard:
         self.stalemate_state = False
         self.promotion = None
         self.promote_to = ""
+        self.sound = False
+        self.piece_captured = False
         self._initialize_empty_board()
 
     def draw_board(self):
@@ -60,9 +63,21 @@ class ChessBoard:
                 self.state[(i, j)] = None
 
 
-def initializeBoardTexture(board):
+def initializeBoardTexture():
     global board_texture
     board_texture = load_texture("assets/board_full.png")
+
+
+def initializeSounds():
+    global sound_manager
+
+    sound_manager = {
+        "check": load_sound("assets/sounds/check.mp3"),
+        "checkmate": load_sound("assets/sounds/checkmate.mp3"),
+        "stalemate": load_sound("assets/sounds/stalemate.mp3"),
+        "move": load_sound("assets/sounds/move.mp3"),
+        "capture": load_sound("assets/sounds/capture.mp3")
+    }
 
 
 def get_selected_piece(board):
@@ -82,3 +97,20 @@ def get_selected_piece(board):
         piece.dragging = False
         board.selected = None
         piece.move(m_y, m_x, board)
+
+
+def listen_sounds(board):
+    if board.sound:
+        if board.checkmate_state:
+            play_sound(sound_manager["checkmate"])
+        elif board.stalemate_state:
+            play_sound(sound_manager["stalemate"])
+        elif board.check_state:
+            play_sound(sound_manager["check"])
+        elif board.piece_captured:
+            print("CAPTURED")
+            play_sound(sound_manager["capture"])
+            board.piece_captured = False
+        else:
+            play_sound(sound_manager["move"])
+        board.sound = False
