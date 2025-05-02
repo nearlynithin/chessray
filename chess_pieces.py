@@ -19,6 +19,7 @@ class Piece:
             # Update board state
             old_pos = (self.x, self.y)
             new_pos = (x, y)
+            board.piece_captured = True if self.board.state[new_pos] is not None else False
             self.board.state[new_pos] = self
             self.board.state[old_pos] = None
             self.x = x
@@ -61,6 +62,7 @@ class Pawn(Piece):
             self.first = False
             old_pos = (self.x, self.y)
             new_pos = (x, y)
+            board.piece_captured = True if self.board.state[new_pos] is not None else False
             self.board.state[new_pos] = self
             self.board.state[old_pos] = None
             self.x = x
@@ -131,6 +133,7 @@ class Rook(Piece):
         if (x, y) in self.moves:
             old_pos = (self.x, self.y)
             new_pos = (x, y)
+            board.piece_captured = True if self.board.state[new_pos] is not None else False
             self.board.state[new_pos] = self
             self.board.state[old_pos] = None
             self.x = x
@@ -289,6 +292,7 @@ class King(Piece):
 
             old_pos = (self.x, self.y)
             new_pos = (x, y)
+            board.piece_captured = True if self.board.state[new_pos] is not None else False
             self.board.state[new_pos] = self
             self.board.state[old_pos] = None
             self.x = x
@@ -636,8 +640,8 @@ def is_stalemate(board):
 def get_attack_pieces_at(position, attack_color, board):
     attackers = []
     for _, piece in board.state.items():
-        if piece is not None:
-            if piece.color == attack_color and position in piece.moves:
+        if piece is not None and piece.color == attack_color:
+            if is_being_attacked(position, attack_color, board):
                 attackers.append(piece)
     return attackers
 
@@ -743,10 +747,8 @@ def get_attack_path(start, end):
 
 
 def pawn_promotion(board):
-    print(board.promotion)
     if board.promotion and board.promote_to != "":
         pos = board.promotion.get_position()
-        print("POS : ", pos)
         if board.promote_to == "queen":
             board.state[pos] = Queen(
                 board.promotion.color, pos[0], pos[1], board)
