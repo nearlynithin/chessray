@@ -1,16 +1,9 @@
 from pyray import *
 from raylib.enums import MouseButton
-from player import get_current_player
+from player import get_current_player, initializePlayers
+from chess_pieces import initializePieces, update_all_piece_moves, UNITS, BORDER
 
-UNITS = 124  # temp units for the scaling of the board
-BORDER = 46
-# these are custum colours cause why not
-CREAM = Color(255, 253, 208, 255)
-VI = Color(197, 27, 89, 255)
-CAIT = Color(30, 50, 60, 255)
-WOOD = Color(139, 69, 19, 255)
-
-board_texture = None
+texture_manager = dict()
 sound_manager = dict()
 
 
@@ -46,10 +39,11 @@ class ChessBoard:
         self.promote_to = ""
         self.sound = False
         self.piece_captured = False
+        self.reset = False
         self._initialize_empty_board()
 
     def draw_board(self):
-        draw_texture(board_texture, 1, -2, WHITE)
+        draw_texture(texture_manager["board"], 1, -2, WHITE)
 
     def draw_positions(self):
         for i in range(8):
@@ -62,10 +56,30 @@ class ChessBoard:
             for j in range(8):
                 self.state[(i, j)] = None
 
+    def reset_board(self):
+        self.selected = None
+        self.check_state = False
+        self.checkmate_state = False
+        self.stalemate_state = False
+        self.promotion = None
+        self.promote_to = ""
+        self.sound = False
+        self.piece_captured = False
+        self._initialize_empty_board()
+
+        initializePlayers(self)
+        initializePieces(self)
+        update_all_piece_moves(self)
+
 
 def initializeBoardTexture():
-    global board_texture
-    board_texture = load_texture("assets/board_full.png")
+    global texture_manager
+
+    texture_manager = {
+        "board": load_texture("assets/board_full.png"),
+        "checkmate": load_texture("assets/checkmate.png"),
+        "stalemate": load_texture("assets/stalemate.png")
+    }
 
 
 def initializeSounds():
@@ -116,3 +130,19 @@ def listen_sounds(board):
         else:
             play_sound(sound_manager["move"])
         board.sound = False
+
+
+def draw_state(board):
+    x, y = get_screen_width(), get_screen_height()
+    m_pos = get_mouse_position()
+    if board.checkmate_state or board.stalemate_state:
+        b_x, b_y = 857, 662
+        b_w, b_h = 200, 70
+        tex = texture_manager["checkmate"] if board.checkmate_state else texture_manager["stalemate"]
+        reset = Rectangle(b_x, b_y, b_w, b_h)
+        if check_collision_point_rec(m_pos, reset):
+            if is_mouse_button_pressed(MOUSE_LEFT_BUTTON):
+                board.reset_board()
+                play_sound(sound_manager["capture4"])
+        draw_rectangle(0, 0, x, y, Color(38, 15, 19, 200))
+        draw_texture(tex, (x - tex.width) // 2, (y - tex.height) // 2, WHITE)

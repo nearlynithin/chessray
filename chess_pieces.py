@@ -1,6 +1,7 @@
-from pyray import *
-from chess_board import UNITS, BORDER
 from player import switch_turn, get_current_player, get_not_current_player
+from pyray import *
+UNITS = 124
+BORDER = 46
 piece_texture = None
 
 
@@ -529,6 +530,10 @@ def drawPieces(board):
     piece = board.selected
     draw_moves(piece, board)
     for _, piece in board.state.items():
+        if isinstance(piece, King) and piece.check:
+            y, x = piece.get_position()
+            draw_rectangle_rounded(
+                Rectangle(x*UNITS + BORDER + 5, y * UNITS + BORDER + 5, UNITS - 10, UNITS - 10), 0.5, 5, Color(230, 76, 76, 250))
         if piece is not None:
             piece.draw_piece()
 
@@ -609,7 +614,6 @@ def is_checkmate(board):
         for _, piece in board.state.items():
             if piece is not None and piece.color == king.color:
                 for move in piece.moves:
-                    print(piece.color)
                     possible_moves.add(move)
         if len(possible_moves) != 0:
             return False

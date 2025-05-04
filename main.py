@@ -1,5 +1,5 @@
 from pyray import *
-from chess_board import ChessBoard, get_selected_piece, initializeBoardTexture,  initializeSounds, listen_sounds
+from chess_board import ChessBoard, get_selected_piece, initializeBoardTexture,  initializeSounds, listen_sounds, draw_state
 from chess_pieces import initializePieces, initializePieceTextures, drawPieces, update_all_piece_moves, is_checkmate, is_stalemate, pawn_promotion
 from player import initializePlayers
 from ui import *
@@ -55,6 +55,7 @@ class Game:
         board.draw_board()
         drawPieces(board)
         draw_promotion_popup(board)
+        draw_state(board)
         listen_sounds(board)
 
         draw_fps(20, 20)
