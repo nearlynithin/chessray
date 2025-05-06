@@ -58,17 +58,14 @@ class Game:
         board.draw_board()
         drawPieces(board)
         draw_promotion_popup(board)
-        draw_state(board)
         listen_sounds(board)
 
         listen_timer(board)
         draw_fps(20, 20)
         draw_timer_texture()
-        m_pos = get_mouse_position()
-        draw_text(f"{m_pos.x},{m_pos.y}", int(
-            m_pos.x + 10), int(m_pos.y + 10), 15, BLACK)
         draw_timers()
         draw_buttons(board)
+        draw_state(board)
         end_drawing()
 
 
