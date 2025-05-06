@@ -42,6 +42,9 @@ class Game:
         is_checkmate(board)
         is_stalemate(board)
         pawn_promotion(board)
+
+        update_timers() 
+
         if board.checkmate_state:
             print("CHECKMATE")
         elif board.stalemate_state:
@@ -58,13 +61,26 @@ class Game:
         draw_state(board)
         listen_sounds(board)
 
+        mode = draw_sidebar_ui()
+        if mode == "new_game":
+            self.board = ChessBoard()
+            initializePlayers(self.board)
+            initializePieces(self.board)
+            update_all_piece_moves(self.board)
+        elif mode == "continue":
+            pass
+        elif mode == "toggle_turn":
+            toggle_timer()
+
         draw_fps(20, 20)
+        draw_timers()  
         end_drawing()
 
 
 if __name__ == '__main__':
     game = Game()
     board = ChessBoard()
+    
 
     if (game.initialize()):
         game.run_loop()
