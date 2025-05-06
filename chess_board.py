@@ -78,8 +78,16 @@ def initializeBoardTexture():
     texture_manager = {
         "board": load_texture("assets/board_full.png"),
         "checkmate": load_texture("assets/checkmate.png"),
-        "stalemate": load_texture("assets/stalemate.png")
+        "stalemate": load_texture("assets/stalemate.png"),
+        "timer": load_texture("assets/timer.png"),
+        "timer_button": load_texture("assets/timer_button.png"),
+        "restart": load_texture("assets/restart.png"),
+        "exit": load_texture("assets/exit.png")
     }
+
+
+def get_texture(name):
+    return texture_manager.get(name)
 
 
 def initializeSounds():

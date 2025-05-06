@@ -43,7 +43,7 @@ class Game:
         is_stalemate(board)
         pawn_promotion(board)
 
-        update_timers() 
+        update_timers()
 
         if board.checkmate_state:
             print("CHECKMATE")
@@ -61,26 +61,20 @@ class Game:
         draw_state(board)
         listen_sounds(board)
 
-        mode = draw_sidebar_ui()
-        if mode == "new_game":
-            self.board = ChessBoard()
-            initializePlayers(self.board)
-            initializePieces(self.board)
-            update_all_piece_moves(self.board)
-        elif mode == "continue":
-            pass
-        elif mode == "toggle_turn":
-            toggle_timer()
-
+        listen_timer(board)
         draw_fps(20, 20)
-        draw_timers()  
+        draw_timer_texture()
+        m_pos = get_mouse_position()
+        draw_text(f"{m_pos.x},{m_pos.y}", int(
+            m_pos.x + 10), int(m_pos.y + 10), 15, BLACK)
+        draw_timers()
+        draw_buttons(board)
         end_drawing()
 
 
 if __name__ == '__main__':
     game = Game()
     board = ChessBoard()
-    
 
     if (game.initialize()):
         game.run_loop()

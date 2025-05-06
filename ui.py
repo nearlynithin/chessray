@@ -1,66 +1,54 @@
 from pyray import *
 import random
+from chess_board import get_texture
 
-SCREEN_W = 1920 
+# Screen and UI constants
+SCREEN_W = 1920
 SCREEN_H = 1080
-
-# Sidebar dimensions and styling
 BUTTON_WIDTH = 300
 BUTTON_HEIGHT = 70
 BUTTON_SPACING = 40
-BUTTON_X = SCREEN_W - BUTTON_WIDTH - 40  # 40px from right edge
-button_y_start = 150  # Vertical start
-BUTTON_COLOR = LIGHTGRAY
-BUTTON_HOVER = DARKGRAY
+BUTTON_X = SCREEN_W - BUTTON_WIDTH - 60  # Sidebar
+BUTTON_Y = 800  # Fixed position for switch turn button
 
-#timers
-white_time = 0.0
-black_time = 0.0
+# Timer settings
+STARTING_TIME = 600.0  # 10 minutes in seconds
+white_time = STARTING_TIME
+black_time = STARTING_TIME
 active_timer = None  # "white" or "black"
 last_timer_update = 0.0
 
-button_x = SCREEN_W - BUTTON_WIDTH - 60  # 60px from right edge
-center_y = SCREEN_H = 1080 // 2 - ((BUTTON_HEIGHT * 2 + BUTTON_SPACING) // 2)
-button_y_start = (SCREEN_H // 2) - ((BUTTON_HEIGHT * 2 + BUTTON_SPACING) // 2) # Updated Y-coordinate calculation for toggle_btn
-
-# Define buttons as rectangles
-new_game_btn = Rectangle(button_x, center_y, BUTTON_WIDTH, BUTTON_HEIGHT)
-continue_btn = Rectangle(button_x, center_y + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT)
-toggle_btn = Rectangle(BUTTON_X, button_y_start + 2 * (BUTTON_HEIGHT + BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT) #timer button 
-
+# Promotion settings
 promotion_choices = ["Queen", "Rook", "Bishop", "Knight"]
 PROMOTION_WIDTH = 500
 PROMOTION_HEIGHT = 300
+
+# UI Rects
+toggle_btn = Rectangle(BUTTON_X, BUTTON_Y, BUTTON_WIDTH, BUTTON_HEIGHT)
 
 
 def draw_promotion_popup(board):
     if board.promotion is not None:
         mouse_pos = get_mouse_position()
         mouse_clicked = is_mouse_button_pressed(MOUSE_LEFT_BUTTON)
+
         promotion_rect = Rectangle(
             (get_screen_width() - PROMOTION_WIDTH) // 2,
             (get_render_height() - PROMOTION_HEIGHT) // 2,
             PROMOTION_WIDTH,
             PROMOTION_HEIGHT
         )
-        # Dimmed background
+
         draw_rectangle(0, 0, get_screen_width(),
                        get_screen_height(), Color(0, 0, 0, 100))
-
-        # Popup box
-        draw_rectangle_rec(promotion_rect, Color(
-            245, 245, 245, 240))  # light, almost opaque
+        draw_rectangle_rec(promotion_rect, Color(245, 245, 245, 240))
         draw_rectangle_lines_ex(promotion_rect, 4, DARKGRAY)
-
         draw_text("Promote to:", int(promotion_rect.x + 20),
                   int(promotion_rect.y + 20), 24, BLACK)
 
         for i, name in enumerate(promotion_choices):
-            btn_rect = Rectangle(
-                promotion_rect.x + 30 + i * 90,
-                promotion_rect.y + 80,
-                80, 40
-            )
+            btn_rect = Rectangle(promotion_rect.x + 30 +
+                                 i * 90, promotion_rect.y + 80, 80, 40)
             hovered = check_collision_point_rec(mouse_pos, btn_rect)
             draw_rectangle_rec(btn_rect, DARKGRAY if hovered else LIGHTGRAY)
             draw_text(name, int(btn_rect.x + 10),
@@ -69,41 +57,33 @@ def draw_promotion_popup(board):
             if hovered and mouse_clicked:
                 board.promote_to = name.lower()
 
-# change name later
-def draw_sidebar_ui():
-    global white_time, black_time, active_timer, last_timer_update
 
-    mouse_pos = get_mouse_position()
-    mouse_clicked = is_mouse_button_pressed(MOUSE_LEFT_BUTTON)
+def listen_timer(board):
+    current_turn = "white" if board.player1.is_turn else "black"
 
-    if draw_button(new_game_btn, "New Game", mouse_pos, mouse_clicked):
-        # Reset both timers
-        white_time = 0.0
-        black_time = 0.0
-        active_timer = "white"  # White starts first in chess
-        last_timer_update = get_time()
-        return "new_game"
-    
-    if draw_button(continue_btn, "Continue", mouse_pos, mouse_clicked):
-        return "continue"
+    if last_timer_update == 0 and board.player2.is_turn:
+        toggle_timer()
 
-    if draw_button(toggle_btn, "Switch Turn", mouse_pos, mouse_clicked):
-        return "toggle_turn"
-
-    return None
+    if is_key_pressed(KeyboardKey.KEY_SPACE):
+        if active_timer != current_turn:
+            toggle_timer()
 
 
 def update_timers():
-    global white_time, black_time, active_timer, last_timer_update
+    global white_time, black_time, last_timer_update
+
+    if active_timer is None:
+        return
 
     now = get_time()
     delta = now - last_timer_update
     last_timer_update = now
 
     if active_timer == "white":
-        white_time += delta
+        white_time = max(0.0, white_time - delta)
     elif active_timer == "black":
-        black_time += delta
+        black_time = max(0.0, black_time - delta)
+
 
 def draw_timers():
     def format_time(t):
@@ -111,61 +91,53 @@ def draw_timers():
         seconds = int(t % 60)
         return f"{minutes:02}:{seconds:02}"
 
-    # Set the X coordinate to move the timer to the right side
-    right_x = SCREEN_W - 250  # 250px from the right edge
+    draw_text(format_time(white_time), 1220, 365, 90, BLACK)
+    draw_text(format_time(black_time), 1525, 365, 90, BLACK)
 
-    draw_text(f"White: {format_time(white_time)}", right_x, 50, 30, BLACK)
-    draw_text(f"Black: {format_time(black_time)}", right_x, 100, 30, BLACK)
-
-def draw_button(rect, text, mouse_pos, mouse_clicked):
-    hovered = check_collision_point_rec(mouse_pos, rect)
-    draw_rectangle_rec(rect, BUTTON_HOVER if hovered else BUTTON_COLOR)
-    draw_text(text, int(rect.x + 20), int(rect.y + 15), 20, BLACK)
-
-    return hovered and mouse_clicked
 
 def toggle_timer():
     global active_timer, last_timer_update
+    active_timer = "white" if active_timer == "black" else "black"
+    last_timer_update = get_time()
+
+
+def draw_timer_texture():
+    draw_texture(get_texture("timer"), 1110, 200, WHITE)
+    tex = get_texture("timer_button")
+
     if active_timer == "white":
-        active_timer = "black"
+        draw_texture(tex, 1231, 180, WHITE)
     else:
-        active_timer = "white"
-    last_timer_update = get_time()  # reset to avoid time jump
-
-# ignore this for now
-def draw_scanlines():
-    for i in range(0, get_screen_height(), 4):
-        draw_rectangle(0, i, get_screen_width(), 2, Color(0, 0, 0, 40))
-
-
-def draw_vhs_tint():
-    draw_rectangle(0, 0, get_screen_width(),
-                   get_screen_height(), Color(255, 0, 50, 20))
+        draw_texture_pro(
+            tex,
+            # source rectangle (flipped)
+            Rectangle(0, 0, -tex.width, tex.height),
+            Rectangle(1231, 180, tex.width, tex.height),  # destination
+            Vector2(0, 0),
+            0,
+            WHITE
+        )
 
 
-def draw_vhs_noise():
-    for i in range(30):
-        x = random.randint(0, get_screen_width())
-        y = random.randint(0, get_screen_height())
-        draw_pixel(x, y, Color(255, 255, 255, 100))
+def draw_buttons(board):
+    global last_timer_update
+    global white_time
+    global black_time
+    global active_timer
+    restart = get_texture("restart")
+    exit = get_texture("exit")
+    draw_texture(restart, 1050, 900, WHITE)
+    draw_texture(exit, 1490, 900, WHITE)
+    mpos = get_mouse_position()
+    if check_collision_point_rec(mpos, Rectangle(1050, 900, restart.width, restart.height)):
+        if is_mouse_button_pressed(MOUSE_LEFT_BUTTON):
+            board.reset_board()
+            last_timer_update = 0.0
+            STARTING_TIME = 600.0  # 10 minutes in seconds
+            white_time = STARTING_TIME
+            black_time = STARTING_TIME
+            active_timer = None  # "white" or "black"
 
-# movement here
-
-
-scanline_offset = 0  # global or class-level variable
-
-
-def draw_scanlines_moving():
-    global scanline_offset
-    scanline_offset = (scanline_offset + 1) % 4  # move slowly
-    for y in range(0, get_screen_height(), 4):
-        draw_rectangle(0, y + scanline_offset,
-                       get_screen_width(), 2, Color(0, 0, 0, 40))
-
-
-def draw_vhs_noise_moving():
-    for _ in range(30):
-        x = random.randint(0, get_screen_width())
-        y = random.randint(0, get_screen_height())
-        alpha = random.randint(60, 150)  # Flickering brightness
-        draw_pixel(x, y, Color(255, 255, 255, alpha))
+    if check_collision_point_rec(mpos, Rectangle(1490, 900, exit.width, exit.height)):
+        if is_mouse_button_pressed(MOUSE_LEFT_BUTTON):
+            close_window()
