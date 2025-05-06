@@ -1,22 +1,32 @@
 from pyray import *
 import random
 
+SCREEN_W = 1920 
+SCREEN_H = 1080
+
 # Sidebar dimensions and styling
-SIDEBAR_X = 8 * 90  # 8 tiles * 90 units per tile = 720
-SIDEBAR_WIDTH = 560
-BUTTON_WIDTH = 200
-BUTTON_HEIGHT = 50
-BUTTON_SPACING = 30
+BUTTON_WIDTH = 300
+BUTTON_HEIGHT = 70
+BUTTON_SPACING = 40
+BUTTON_X = SCREEN_W - BUTTON_WIDTH - 40  # 40px from right edge
+button_y_start = 150  # Vertical start
 BUTTON_COLOR = LIGHTGRAY
 BUTTON_HOVER = DARKGRAY
-VHS_DARK = Color(255, 0, 100, 20)
+
+#timers
+white_time = 0.0
+black_time = 0.0
+active_timer = None  # "white" or "black"
+last_timer_update = 0.0
+
+button_x = SCREEN_W - BUTTON_WIDTH - 60  # 60px from right edge
+center_y = SCREEN_H = 1080 // 2 - ((BUTTON_HEIGHT * 2 + BUTTON_SPACING) // 2)
+button_y_start = (SCREEN_H // 2) - ((BUTTON_HEIGHT * 2 + BUTTON_SPACING) // 2) # Updated Y-coordinate calculation for toggle_btn
 
 # Define buttons as rectangles
-button_y_start = 150
-new_game_btn = Rectangle(SIDEBAR_X + 50, button_y_start,
-                         BUTTON_WIDTH, BUTTON_HEIGHT)
-continue_btn = Rectangle(SIDEBAR_X + 50, button_y_start +
-                         BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT)
+new_game_btn = Rectangle(button_x, center_y, BUTTON_WIDTH, BUTTON_HEIGHT)
+continue_btn = Rectangle(button_x, center_y + BUTTON_HEIGHT + BUTTON_SPACING, BUTTON_WIDTH, BUTTON_HEIGHT)
+toggle_btn = Rectangle(BUTTON_X, button_y_start + 2 * (BUTTON_HEIGHT + BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT) #timer button 
 
 promotion_choices = ["Queen", "Rook", "Bishop", "Knight"]
 PROMOTION_WIDTH = 500
@@ -59,24 +69,53 @@ def draw_promotion_popup(board):
             if hovered and mouse_clicked:
                 board.promote_to = name.lower()
 
-
+# change name later
 def draw_sidebar_ui():
-    """Draw the grey sidebar and the buttons."""
-    # Sidebar background
-    draw_rectangle(SIDEBAR_X, 0, SIDEBAR_WIDTH, get_screen_height(), VHS_DARK)
+    global white_time, black_time, active_timer, last_timer_update
 
-    # Get mouse position
     mouse_pos = get_mouse_position()
     mouse_clicked = is_mouse_button_pressed(MOUSE_LEFT_BUTTON)
 
-    # Draw and check buttons
-    if draw_button(new_game_btn, "Blitz", mouse_pos, mouse_clicked):
+    if draw_button(new_game_btn, "New Game", mouse_pos, mouse_clicked):
+        # Reset both timers
+        white_time = 0.0
+        black_time = 0.0
+        active_timer = "white"  # White starts first in chess
+        last_timer_update = get_time()
         return "new_game"
-    if draw_button(continue_btn, "Normal", mouse_pos, mouse_clicked):
+    
+    if draw_button(continue_btn, "Continue", mouse_pos, mouse_clicked):
         return "continue"
+
+    if draw_button(toggle_btn, "Switch Turn", mouse_pos, mouse_clicked):
+        return "toggle_turn"
 
     return None
 
+
+def update_timers():
+    global white_time, black_time, active_timer, last_timer_update
+
+    now = get_time()
+    delta = now - last_timer_update
+    last_timer_update = now
+
+    if active_timer == "white":
+        white_time += delta
+    elif active_timer == "black":
+        black_time += delta
+
+def draw_timers():
+    def format_time(t):
+        minutes = int(t // 60)
+        seconds = int(t % 60)
+        return f"{minutes:02}:{seconds:02}"
+
+    # Set the X coordinate to move the timer to the right side
+    right_x = SCREEN_W - 250  # 250px from the right edge
+
+    draw_text(f"White: {format_time(white_time)}", right_x, 50, 30, BLACK)
+    draw_text(f"Black: {format_time(black_time)}", right_x, 100, 30, BLACK)
 
 def draw_button(rect, text, mouse_pos, mouse_clicked):
     hovered = check_collision_point_rec(mouse_pos, rect)
@@ -85,7 +124,15 @@ def draw_button(rect, text, mouse_pos, mouse_clicked):
 
     return hovered and mouse_clicked
 
+def toggle_timer():
+    global active_timer, last_timer_update
+    if active_timer == "white":
+        active_timer = "black"
+    else:
+        active_timer = "white"
+    last_timer_update = get_time()  # reset to avoid time jump
 
+# ignore this for now
 def draw_scanlines():
     for i in range(0, get_screen_height(), 4):
         draw_rectangle(0, i, get_screen_width(), 2, Color(0, 0, 0, 40))
