@@ -1,4 +1,4 @@
-<center>
+<div align="center">
 <h1>
 ChessRay
 </h1>
@@ -7,7 +7,7 @@ A chess game written in python with <a href="https://www.raylib.com/"> Raylib </
 
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![RayLib](https://img.shields.io/badge/RAYLIB-FFFFFF?style=for-the-badge&logo=raylib&logoColor=black)
 
-</center>
+</div>
 
 ![screenshot](assets/screenshot.png)
 
